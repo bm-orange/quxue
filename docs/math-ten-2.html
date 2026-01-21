@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣味数学练一练</title>
+    
+    <script src="static/css/tailwind.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'chalkboard': '#374151',
+                        'soft-blue': '#BFDBFE',
+                        'soft-green': '#BBF7D0',
+                        'soft-red': '#FECACA',
+                        'paper': '#FFFBEB',
+                        'pencil': '#4B5563'
+                    },
+                    fontFamily: {
+                        'sans': ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                        'hand': ['"Comic Sans MS"', '"Chalkboard SE"', 'sans-serif'] // 模拟手写体
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 禁止双击缩放 */
+        body { touch-action: manipulation; }
+        
+        /* 自定义动画 */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .anim-pop { animation: pop 0.3s ease-in-out; }
+        .anim-shake { animation: shake 0.4s ease-in-out; }
+        .anim-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+        /* 隐藏数字输入框的箭头 */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* 拆解步骤图连线模拟 */
+        .branch-line::before {
+            content: ''; position: absolute; top: -10px; left: 50%; width: 2px; height: 15px; 
+            background: #9CA3AF; transform: rotate(-30deg); transform-origin: bottom;
+        }
+        .branch-line::after {
+            content: ''; position: absolute; top: -10px; left: 50%; width: 2px; height: 15px; 
+            background: #9CA3AF; transform: rotate(30deg); transform-origin: bottom;
+        }
+    </style>
+</head>
+<body class="bg-paper text-pencil h-screen flex flex-col items-center justify-between overflow-hidden font-sans select-none">
+
+    <header class="w-full max-w-2xl flex justify-between items-center p-4 pt-6">
+        <div class="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-orange-100">
+            <span class="text-2xl">⭐</span>
+            <span id="scoreDisplay" class="text-xl font-bold text-yellow-500 font-hand">0</span>
+        </div>
+        <div class="text-sm text-gray-400">连续答对: <span id="streakDisplay" class="font-bold text-gray-600">0</span></div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-lg px-4 relative">
+        
+        <div id="problemCard" class="bg-white w-full rounded-3xl shadow-lg border-b-8 border-blue-100 p-8 mb-6 relative transition-all duration-300">
+            <button onclick="toggleHint()" class="absolute top-4 right-4 text-gray-300 hover:text-yellow-400 transition-colors p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548 5.478a1 1 0 01-.994.89h-6.27a1 1 0 01-.994-.89l-.548-5.478z" />
+                </svg>
+            </button>
+
+            <div class="flex justify-center items-center text-6xl font-bold font-hand space-x-4 mb-4">
+                <span id="num1">?</span>
+                <span id="operator">+</span>
+                <span id="num2">?</span>
+                <span>=</span>
+                <span id="userAnswer" class="text-blue-500 min-w-[1.5em] text-center border-b-4 border-gray-200 h-[1.2em] leading-none">?</span>
+            </div>
+
+            <div id="methodViz" class="hidden mt-6 pt-4 border-t border-dashed border-gray-200 w-full anim-fade-in">
+                <div class="flex flex-col items-center text-gray-500">
+                    <div class="text-sm mb-2 font-bold text-blue-400 bg-blue-50 px-3 py-1 rounded-full" id="methodName">方法名</div>
+                    
+                    <div id="stepsContainer" class="flex items-start justify-center gap-6 font-hand text-2xl">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="feedbackMsg" class="h-8 text-xl font-bold text-center mb-4 transition-opacity duration-300 opacity-0"></div>
+
+    </main>
+
+    <div class="w-full max-w-xl bg-white rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.05)] p-4 pb-8">
+        <div class="grid grid-cols-3 gap-3">
+            <button onclick="inputNum(1)" class="key-btn">1</button>
+            <button onclick="inputNum(2)" class="key-btn">2</button>
+            <button onclick="inputNum(3)" class="key-btn">3</button>
+            <button onclick="inputNum(4)" class="key-btn">4</button>
+            <button onclick="inputNum(5)" class="key-btn">5</button>
+            <button onclick="inputNum(6)" class="key-btn">6</button>
+            <button onclick="inputNum(7)" class="key-btn">7</button>
+            <button onclick="inputNum(8)" class="key-btn">8</button>
+            <button onclick="inputNum(9)" class="key-btn">9</button>
+            <button onclick="deleteNum()" class="bg-gray-100 text-gray-500 rounded-2xl p-4 text-2xl font-bold active:scale-95 transition-transform shadow-sm border-b-4 border-gray-200">⌫</button>
+            <button onclick="inputNum(0)" class="key-btn">0</button>
+            <button onclick="checkAnswer()" class="bg-green-400 text-white rounded-2xl p-4 text-2xl font-bold active:scale-95 transition-transform shadow-sm border-b-4 border-green-600">OK</button>
+        </div>
+    </div>
+
+    <style>
+        .key-btn {
+            @apply bg-blue-50 text-blue-600 rounded-2xl p-4 text-3xl font-bold font-hand active:scale-95 transition-transform shadow-sm border-b-4 border-blue-200;
+        }
+    </style>
+
+    <script>
+        // --- 状态管理 ---
+        const state = {
+            num1: 0,
+            num2: 0,
+            operator: '+', // '+' 或 '-'
+            answer: 0,
+            userInput: '',
+            score: parseInt(localStorage.getItem('math_score') || 0),
+            streak: 0,
+            method: '' // 'make-ten', 'break-ten', 'flat-ten'
+        };
+
+        // --- 初始化 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateScoreUI();
+            generateProblem();
+        });
+
+        // --- 核心逻辑：生成题目 ---
+        function generateProblem() {
+            // 清空输入和界面状态
+            state.userInput = '';
+            document.getElementById('userAnswer').innerText = '?';
+            document.getElementById('userAnswer').className = "text-blue-500 min-w-[1.5em] text-center border-b-4 border-gray-200 h-[1.2em] leading-none";
+            document.getElementById('methodViz').classList.add('hidden');
+            document.getElementById('feedbackMsg').style.opacity = '0';
+
+            // 50% 概率加法，50% 概率减法
+            const isAddition = Math.random() > 0.5;
+
+            if (isAddition) {
+                // 生成进位加法 (凑十法练习场景: 和在11-18之间)
+                // num1: 2-9, num2: 使得和 > 10
+                state.num1 = Math.floor(Math.random() * 8) + 2; // 2-9
+                let minNum2 = 11 - state.num1;
+                if (minNum2 < 2) minNum2 = 2;
+                let maxNum2 = 9;
+                
+                // 确保 num2 在合理范围内
+                if (minNum2 > maxNum2) { state.num1 = 9; minNum2 = 2; }
+                
+                state.num2 = Math.floor(Math.random() * (maxNum2 - minNum2 + 1)) + minNum2;
+                state.operator = '+';
+                state.answer = state.num1 + state.num2;
+                state.method = 'make-ten'; // 凑十法
+
+            } else {
+                // 生成退位减法 (破十法/平十法练习场景: 被减数11-18，减数导致退位)
+                state.num1 = Math.floor(Math.random() * 8) + 11; // 11-18
+                // 减数要比被减数的个位大，才能触发退位
+                let minSub = (state.num1 % 10) + 1;
+                let maxSub = 9;
+                
+                state.num2 = Math.floor(Math.random() * (maxSub - minSub + 1)) + minSub;
+                state.operator = '-';
+                state.answer = state.num1 - state.num2;
+                
+                // 随机选择减法策略用于提示
+                state.method = Math.random() > 0.5 ? 'break-ten' : 'flat-ten';
+            }
+
+            // 更新UI
+            document.getElementById('num1').innerText = state.num1;
+            document.getElementById('operator').innerText = state.operator;
+            document.getElementById('num2').innerText = state.num2;
+        }
+
+        // --- 交互逻辑：键盘输入 ---
+        function inputNum(n) {
+            if (state.userInput.length >= 2) return; // 限制最多2位
+            state.userInput += n;
+            updateInputUI();
+        }
+
+        function deleteNum() {
+            state.userInput = state.userInput.slice(0, -1);
+            updateInputUI();
+        }
+
+        function updateInputUI() {
+            const display = document.getElementById('userAnswer');
+            display.innerText = state.userInput === '' ? '?' : state.userInput;
+            display.classList.remove('text-red-500', 'text-green-500');
+            display.classList.add('text-blue-500');
+        }
+
+        // --- 核心逻辑：检查答案 ---
+        function checkAnswer() {
+            if (state.userInput === '') return;
+
+            const userVal = parseInt(state.userInput);
+            const isCorrect = userVal === state.answer;
+            const feedbackEl = document.getElementById('feedbackMsg');
+            const cardEl = document.getElementById('problemCard');
+
+            if (isCorrect) {
+                // 正确处理
+                state.score += 10 + (state.streak * 2); // 连击加分
+                state.streak++;
+                updateScoreUI();
+                saveProgress();
+
+                feedbackEl.innerText = getRandomPraise();
+                feedbackEl.className = "h-8 text-xl font-bold text-center mb-4 text-green-500 anim-pop";
+                feedbackEl.style.opacity = '1';
+                
+                document.getElementById('userAnswer').classList.replace('text-blue-500', 'text-green-500');
+
+                // 延迟生成新题目
+                setTimeout(generateProblem, 1200);
+
+            } else {
+                // 错误处理
+                state.streak = 0;
+                updateScoreUI();
+                
+                feedbackEl.innerText = "再试一次哦！💪";
+                feedbackEl.className = "h-8 text-xl font-bold text-center mb-4 text-red-400 anim-shake";
+                feedbackEl.style.opacity = '1';
+
+                cardEl.classList.add('anim-shake');
+                document.getElementById('userAnswer').classList.replace('text-blue-500', 'text-red-500');
+                
+                setTimeout(() => cardEl.classList.remove('anim-shake'), 400);
+                
+                // 错误时自动显示方法提示
+                renderMethodHint();
+                document.getElementById('methodViz').classList.remove('hidden');
+            }
+        }
+
+        // --- 教学逻辑：方法可视化渲染 ---
+        function toggleHint() {
+            const viz = document.getElementById('methodViz');
+            if (viz.classList.contains('hidden')) {
+                renderMethodHint();
+                viz.classList.remove('hidden');
+            } else {
+                viz.classList.add('hidden');
+            }
+        }
+
+        function renderMethodHint() {
+            const container = document.getElementById('stepsContainer');
+            const nameEl = document.getElementById('methodName');
+            container.innerHTML = '';
+
+            if (state.method === 'make-ten') {
+                // 凑十法: 大数 + (小数拆分)
+                // 例如 9 + 5.  5 拆成 1 和 4.
+                // 逻辑: 找到距离10的差补数
+                const big = Math.max(state.num1, state.num2);
+                const small = Math.min(state.num1, state.num2);
+                const need = 10 - big;
+                const left = small - need;
+                
+                nameEl.innerText = `💡 凑十法 (把 ${big} 凑成 10)`;
+                // 渲染: Big ... Small(split)
+                // 结构: Big + need = 10, then 10 + left
+                container.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        <div>${big}</div>
+                        <div class="text-xs text-transparent">.</div>
+                    </div>
+                    <div>+</div>
+                    <div class="flex flex-col items-center relative">
+                        <div>${small}</div>
+                        <div class="flex gap-4 mt-1 border-t border-gray-400 pt-1 text-sm relative">
+                            <span class="text-red-500 font-bold">${need}</span>
+                            <span>${left}</span>
+                        </div>
+                    </div>
+                    <div class="text-gray-400">→</div>
+                    <div class="text-blue-500">10 + ${left} = ${state.answer}</div>
+                `;
+            } 
+            else if (state.method === 'break-ten') {
+                // 破十法: 15 - 8. 15拆成10和5. 10-8=2. 2+5=7.
+                const unit = state.num1 % 10;
+                const resultStep1 = 10 - state.num2;
+                
+                nameEl.innerText = `💡 破十法 (10 减 ${state.num2})`;
+                container.innerHTML = `
+                    <div class="flex flex-col items-center relative">
+                        <div>${state.num1}</div>
+                        <div class="flex gap-4 mt-1 border-t border-gray-400 pt-1 text-sm">
+                            <span class="text-blue-600 font-bold">10</span>
+                            <span>${unit}</span>
+                        </div>
+                    </div>
+                    <div>-</div>
+                    <div>${state.num2}</div>
+                    <div class="text-gray-400">→</div>
+                    <div class="flex flex-col text-sm text-left">
+                        <span class="text-blue-500">10 - ${state.num2} = ${resultStep1}</span>
+                        <span class="text-green-600">${resultStep1} + ${unit} = ${state.answer}</span>
+                    </div>
+                `;
+            }
+            else if (state.method === 'flat-ten') {
+                // 平十法 (连减法): 15 - 8. 8拆成5和3. 15-5=10. 10-3=7.
+                const unit = state.num1 % 10; // 5
+                const left = state.num2 - unit; // 3
+                
+                nameEl.innerText = `💡 平十法 (先减去 ${unit})`;
+                container.innerHTML = `
+                    <div>${state.num1}</div>
+                    <div>-</div>
+                    <div class="flex flex-col items-center relative">
+                        <div>${state.num2}</div>
+                        <div class="flex gap-4 mt-1 border-t border-gray-400 pt-1 text-sm">
+                            <span class="text-red-500 font-bold">${unit}</span>
+                            <span>${left}</span>
+                        </div>
+                    </div>
+                    <div class="text-gray-400">→</div>
+                    <div class="flex flex-col text-sm text-left">
+                        <span class="text-blue-500">${state.num1} - ${unit} = 10</span>
+                        <span class="text-green-600">10 - ${left} = ${state.answer}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // --- 辅助功能 ---
+        function updateScoreUI() {
+            document.getElementById('scoreDisplay').innerText = state.score;
+            document.getElementById('streakDisplay').innerText = state.streak;
+        }
+
+        function saveProgress() {
+            localStorage.setItem('math_score', state.score);
+        }
+
+        function getRandomPraise() {
+            const praises = ["太棒了！🌟", "你真聪明！🧠", "完全正确！💯", "继续加油！🚀", "数学小天才！🎓"];
+            return praises[Math.floor(Math.random() * praises.length)];
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣味数学练一练 (UI优化版)</title>
+    
+    <script src="static/css/tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pink-main': '#F472B6', 
+                        'pink-light': '#FDF2F8',
+                        'blue-soft': '#EFF6FF',
+                        'text-ink': '#374151'
+                    },
+                    fontFamily: {
+                        'hand': ['"Comic Sans MS"', '"Chalkboard SE"', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 8px 30px rgba(0,0,0,0.08)',
+                        'inner': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        
+        /* 动画 */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        .anim-shake { animation: shake 0.3s ease-in-out; }
+        .anim-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* 输入框基础样式 */
+        .input-box {
+            width: 3.5rem; height: 3.5rem;
+            text-align: center; font-size: 1.5rem; font-weight: bold;
+            border: 2px solid #E5E7EB; border-radius: 0.75rem;
+            background: #FFF; color: #374151;
+            outline: none; transition: all 0.2s ease;
+            font-family: inherit;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        /* 激活/正确/错误状态 */
+        .input-box:focus, .input-box.active { 
+            border-color: #F472B6; box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.2); transform: translateY(-2px); 
+        }
+        .input-box.error { border-color: #EF4444; background-color: #FEF2F2; color: #EF4444; }
+        .input-box.success { border-color: #10B981; background-color: #ECFDF5; color: #10B981; }
+        
+        /* 占位空框（视觉辅助） */
+        .ghost-box { width: 3.5rem; height: 3.5rem; }
+
+        /* SVG 线条容器 */
+        .svg-lines { overflow: visible; width: 100%; height: 2rem; pointer-events: none; }
+        .line-path { fill: none; stroke: #F472B6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+</head>
+<body class="bg-blue-soft text-text-ink h-screen flex flex-col font-sans select-none">
+
+    <header class="flex-none w-full max-w-xl mx-auto flex justify-between items-center p-5 z-20">
+        <div class="flex items-center gap-2 bg-white rounded-full px-5 py-2 shadow-card font-hand cursor-pointer active:scale-95 transition" onclick="resetScore()">
+            <span class="text-xl">⭐</span>
+            <span id="scoreDisplay" class="text-xl font-bold text-yellow-500">0</span>
+        </div>
+        <button onclick="toggleSettings()" class="bg-white p-3 rounded-full shadow-card text-gray-400 hover:text-pink-500 transition active:scale-90">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+    </header>
+
+    <div id="settingsPanel" class="fixed inset-0 bg-black/40 z-50 hidden flex items-start justify-center pt-24 backdrop-blur-sm transition-all" onclick="toggleSettings()">
+        <div class="bg-white rounded-3xl w-[85%] max-w-sm p-6 shadow-2xl anim-pop" onclick="event.stopPropagation()">
+            <h2 class="text-xl font-bold mb-6 text-center text-gray-600 font-hand">选择练习模式</h2>
+            <div class="space-y-3 font-hand">
+                <label class="setting-option group"><input type="radio" name="mode" value="mixed" class="hidden">
+                    <div class="option-card border-blue-200 bg-blue-50 text-blue-600">🔀 混合练习</div></label>
+                <label class="setting-option group"><input type="radio" name="mode" value="make-ten" class="hidden">
+                    <div class="option-card border-pink-200 bg-pink-50 text-pink-600">🔟 凑十法 (加法)</div></label>
+                <label class="setting-option group"><input type="radio" name="mode" value="break-ten" class="hidden">
+                    <div class="option-card border-green-200 bg-green-50 text-green-600">💥 破十法 (减法)</div></label>
+                <label class="setting-option group"><input type="radio" name="mode" value="flat-ten" class="hidden">
+                    <div class="option-card border-purple-200 bg-purple-50 text-purple-600">➖ 平十法 (减法)</div></label>
+            </div>
+        </div>
+    </div>
+    <style>
+        .option-card { @apply p-4 rounded-xl border-2 font-bold text-center transition-all cursor-pointer; }
+        input:checked + .option-card { @apply ring-4 ring-offset-2 ring-opacity-50 scale-105; }
+    </style>
+
+    <main class="flex-1 w-full max-w-xl mx-auto flex flex-col justify-start px-4 pt-2">
+        
+        <div id="problemContainer" class="bg-white rounded-[2rem] shadow-card p-6 min-h-[18rem] flex flex-col items-center relative transition-all duration-300">
+            <div id="methodBadge" class="mb-6 px-4 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-500 font-hand tracking-wider">Loading...</div>
+
+            <div id="vizArea" class="flex items-start justify-center gap-2 sm:gap-4 font-hand text-4xl font-bold w-full select-none">
+                </div>
+        </div>
+
+        <div id="feedbackText" class="h-10 mt-6 text-center font-bold text-lg font-hand transition-all opacity-0"></div>
+
+    </main>
+
+    <div class="flex-none w-full max-w-xl mx-auto bg-white rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] p-5 z-30 pb-8">
+        <div class="grid grid-cols-3 gap-3 sm:gap-4">
+            <button class="key-btn" onclick="tapKey(1)">1</button>
+            <button class="key-btn" onclick="tapKey(2)">2</button>
+            <button class="key-btn" onclick="tapKey(3)">3</button>
+            <button class="key-btn" onclick="tapKey(4)">4</button>
+            <button class="key-btn" onclick="tapKey(5)">5</button>
+            <button class="key-btn" onclick="tapKey(6)">6</button>
+            <button class="key-btn" onclick="tapKey(7)">7</button>
+            <button class="key-btn" onclick="tapKey(8)">8</button>
+            <button class="key-btn" onclick="tapKey(9)">9</button>
+            <button class="key-btn bg-gray-50 text-gray-400 text-2xl" onclick="tapKey('del')">⌫</button>
+            <button class="key-btn" onclick="tapKey(0)">0</button>
+            <button class="key-btn bg-pink-main text-white shadow-pink-200 border-pink-600 active:bg-pink-600" onclick="submitCheck()">OK</button>
+        </div>
+    </div>
+    <style>
+        .key-btn {
+            @apply h-14 rounded-2xl bg-white border-b-4 border-gray-100 text-gray-600 text-2xl font-bold font-hand active:scale-95 active:border-b-0 active:translate-y-1 transition-all shadow-sm;
+        }
+    </style>
+
+    <script>
+        // --- 逻辑与状态 ---
+        const state = {
+            score: parseInt(localStorage.getItem('math_score_v3') || 0),
+            mode: localStorage.getItem('math_mode_v3') || 'mixed',
+            curr: null, // 当前题目对象
+            focusId: null // 当前光标位置
+        };
+
+        // --- 初始化 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateScore(0);
+            document.querySelectorAll(`input[name="mode"][value="${state.mode}"]`)[0].checked = true;
+            nextProblem();
+            
+            // 绑定设置切换
+            document.querySelectorAll('input[name="mode"]').forEach(r => {
+                r.addEventListener('change', (e) => {
+                    state.mode = e.target.value;
+                    localStorage.setItem('math_mode_v3', state.mode);
+                    toggleSettings();
+                    setTimeout(nextProblem, 300);
+                });
+            });
+        });
+
+        // --- 核心：生成题目与布局 ---
+        function nextProblem() {
+            resetFeedback();
+            
+            // 1. 算法生成
+            let type = state.mode;
+            if (type === 'mixed') type = ['make-ten', 'break-ten', 'flat-ten'][Math.floor(Math.random() * 3)];
+            
+            let p = { type, num1: 0, num2: 0, ans: 0, inputs: [] }; // inputs: {id, correctVal}
+
+            if (type === 'make-ten') { // 凑十法 8+5
+                p.num1 = rand(2, 9);
+                p.num2 = rand(11 - p.num1, 9); 
+                if(p.num1 + p.num2 < 11) p.num2 = 11 - p.num1;
+                p.ans = p.num1 + p.num2;
+                const need = 10 - p.num1;
+                const left = p.num2 - need;
+                // 布局结构：Num1 + [Num2 -> (need, left)] = Ans
+                p.renderData = { left: p.num1, right: p.num2, splitRight: [need, left], ans: p.ans };
+                p.inputs = [
+                    {id:'i1', val: need}, {id:'i2', val: left}, {id:'i_ans', val: p.ans}
+                ];
+            } else if (type === 'break-ten') { // 破十法 15-9
+                p.num1 = rand(11, 18);
+                const unit = p.num1 % 10;
+                p.num2 = rand(unit + 1, 9);
+                p.ans = p.num1 - p.num2;
+                // 布局结构：[Num1 -> (10, unit)] - Num2 = Ans
+                p.renderData = { left: p.num1, splitLeft: [10, unit], right: p.num2, ans: p.ans };
+                p.inputs = [
+                    {id:'i1', val: 10-p.num2}, {id:'i2', val: p.ans}, {id:'i_ans', val: p.ans} // 修正：中间步通常是填 10-9=1，然后 1+5=6
+                ];
+                // 破十法填空逻辑调整为：
+                // 第一步：拆被减数 (这里默认显示拆好的，或者填空？为了简单，图片通常让孩子填结果)
+                // 按照图片逻辑：通常填 拆出来的两个数(10, 5)，然后填过程和结果。
+                // 简化版填空：填 10-9的结果，填最后结果。
+                // 这里为了对齐图片：填 10-num2的结果(i1)，和 最终结果(i2, i_ans)。
+                // 实际上图片里有三个框。我们做三个框：
+                // 15 - 9. 15拆成10和5.  下面的框填: [1] (即10-9), [6] (即1+5). 等式填 [6].
+                p.inputs = [
+                    {id:'i1', val: 10 - p.num2}, // 10-9的结果
+                    {id:'i2', val: p.ans},       // 剩下加个位的结果
+                    {id:'i_ans', val: p.ans}     // 最终等式结果
+                ];
+            } else { // 平十法 15-9
+                p.num1 = rand(11, 18);
+                const unit = p.num1 % 10;
+                p.num2 = rand(unit + 1, 9);
+                p.ans = p.num1 - p.num2;
+                const left = p.num2 - unit;
+                // 布局结构：Num1 - [Num2 -> (unit, left)] = Ans
+                p.renderData = { left: p.num1, right: p.num2, splitRight: [unit, left], ans: p.ans };
+                p.inputs = [
+                    {id:'i1', val: unit}, {id:'i2', val: left}, {id:'i_ans', val: p.ans}
+                ];
+            }
+            
+            state.curr = p;
+            renderUI(p);
+            
+            // 自动聚焦第一个
+            setTimeout(() => setFocus('i1'), 100);
+        }
+
+        // --- 核心：渲染 HTML 结构 (积木式) ---
+        function renderUI(p) {
+            const area = document.getElementById('vizArea');
+            document.getElementById('methodBadge').innerText = getMethodName(p.type);
+            
+            let html = '';
+
+            // 1. 凑十法渲染 (8 + 5)
+            if (p.type === 'make-ten') {
+                html = `
+                    <div class="flex flex-col items-center justify-start gap-2 pt-2">
+                        <div>${p.renderData.left}</div>
+                        <div class="relative w-full h-8 border-l-2 border-b-2 border-pink-main rounded-bl-xl ml-[50%] opacity-50">
+                            <div class="absolute -bottom-3 left-1/2 text-xs text-pink-main bg-white px-1">+</div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">+</div>
+
+                    <div class="flex flex-col items-center">
+                        <div>${p.renderData.right}</div>
+                        <svg class="svg-lines" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <path d="M50 0 L20 35 M50 0 L80 35" class="line-path" />
+                        </svg>
+                        <div class="flex gap-2">
+                            <input id="i1" class="input-box" readonly onclick="setFocus('i1')">
+                            <input id="i2" class="input-box" readonly onclick="setFocus('i2')">
+                        </div>
+                        <div class="relative w-full h-8 border-r-2 border-b-2 border-pink-main rounded-br-xl mr-[50%] -mt-6 -z-10 opacity-50"></div>
+                    </div>
+
+                    <div class="pt-2">=</div>
+                    <div class="pt-2"><input id="i_ans" class="input-box" readonly onclick="setFocus('i_ans')"></div>
+                `;
+            }
+
+            // 2. 破十法渲染 (15 - 9)
+            else if (p.type === 'break-ten') {
+                const unit = p.renderData.left % 10;
+                html = `
+                    <div class="flex flex-col items-center">
+                        <div>${p.renderData.left}</div>
+                        <svg class="svg-lines" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <path d="M50 0 L20 35 M50 0 L80 35" class="line-path" />
+                        </svg>
+                        <div class="flex gap-3 text-2xl font-normal text-gray-400">
+                            <span class="text-pink-main font-bold">10</span>
+                            <span>${unit}</span>
+                        </div>
+                        <div class="mt-4 flex flex-col gap-2 items-center w-full">
+                            <div class="flex items-center gap-1 text-sm text-gray-400">
+                                10 - ${p.renderData.right} = <input id="i1" class="input-box w-12 h-12 text-lg" readonly onclick="setFocus('i1')">
+                            </div>
+                            <div class="flex items-center gap-1 text-sm text-gray-400">
+                                结果 + ${unit} = <input id="i2" class="input-box w-12 h-12 text-lg" readonly onclick="setFocus('i2')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex flex-col h-full justify-start">
+                        <span>-</span>
+                    </div>
+
+                    <div class="pt-2 flex flex-col items-center">
+                        <div>${p.renderData.right}</div>
+                    </div>
+
+                    <div class="pt-2">=</div>
+                    <div class="pt-2"><input id="i_ans" class="input-box" readonly onclick="setFocus('i_ans')"></div>
+                `;
+            }
+
+            // 3. 平十法渲染 (15 - 9, 9拆成5和4)
+            else {
+                html = `
+                    <div class="pt-2">${p.renderData.left}</div>
+                    <div class="pt-2">-</div>
+                    
+                    <div class="flex flex-col items-center">
+                        <div>${p.renderData.right}</div>
+                        <svg class="svg-lines" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <path d="M50 0 L20 35 M50 0 L80 35" class="line-path" />
+                        </svg>
+                        <div class="flex gap-2">
+                            <input id="i1" class="input-box" readonly onclick="setFocus('i1')">
+                            <input id="i2" class="input-box" readonly onclick="setFocus('i2')">
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">先减${p.inputs[0].val}，再减${p.inputs[1].val}</div>
+                    </div>
+
+                    <div class="pt-2">=</div>
+                    <div class="pt-2"><input id="i_ans" class="input-box" readonly onclick="setFocus('i_ans')"></div>
+                `;
+            }
+
+            area.innerHTML = html;
+        }
+
+        // --- 交互逻辑 ---
+        function setFocus(id) {
+            state.focusId = id;
+            document.querySelectorAll('.input-box').forEach(el => el.classList.remove('active', 'ring-2'));
+            const el = document.getElementById(id);
+            if(el) el.classList.add('active');
+        }
+
+        function tapKey(k) {
+            if (!state.focusId) return;
+            const el = document.getElementById(state.focusId);
+            
+            if (k === 'del') {
+                el.value = el.value.slice(0, -1);
+            } else {
+                if (el.value.length < 2) el.value += k;
+            }
+            
+            // 简单自动跳转逻辑
+            if (el.value.length >= 1) {
+               // 如果是单位数且不需要更多位，可以考虑自动跳，这里暂不自动跳，防止想输两位数
+            }
+            el.classList.remove('error', 'success');
+        }
+
+        function submitCheck() {
+            let correctCount = 0;
+            let firstErr = null;
+            
+            state.curr.inputs.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (parseInt(el.value) === item.val) {
+                    el.classList.add('success');
+                    correctCount++;
+                } else {
+                    el.classList.add('error');
+                    el.classList.add('anim-shake');
+                    setTimeout(() => el.classList.remove('anim-shake'), 500);
+                    if(!firstErr) firstErr = item.id;
+                }
+            });
+
+            const fb = document.getElementById('feedbackText');
+            if (correctCount === state.curr.inputs.length) {
+                // 全对
+                state.score += 10;
+                updateScore(state.score);
+                fb.innerText = "🌟 太棒了！全对！";
+                fb.className = "h-10 mt-6 text-center font-bold text-lg font-hand text-green-500 anim-pop";
+                fb.style.opacity = 1;
+                document.getElementById('problemContainer').classList.add('border-2', 'border-green-200');
+                
+                setTimeout(() => {
+                    document.getElementById('problemContainer').classList.remove('border-2', 'border-green-200');
+                    nextProblem();
+                }, 1500);
+            } else {
+                // 有错
+                fb.innerText = "🤔 还有一点小错误，再检查一下？";
+                fb.className = "h-10 mt-6 text-center font-bold text-lg font-hand text-pink-main";
+                fb.style.opacity = 1;
+                if(firstErr) setFocus(firstErr);
+            }
+        }
+
+        // --- 工具 ---
+        function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function updateScore(s) { 
+            state.score = s; 
+            document.getElementById('scoreDisplay').innerText = s; 
+            localStorage.setItem('math_score_v3', s);
+        }
+        function resetScore() {
+            if(confirm('要清空星星重新开始吗？')) updateScore(0);
+        }
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('hidden');
+        }
+        function resetFeedback() {
+            const fb = document.getElementById('feedbackText');
+            fb.style.opacity = 0;
+        }
+        function getMethodName(t) {
+            const map = {'make-ten': '加法凑十法', 'break-ten': '减法破十法', 'flat-ten': '减法平十法'};
+            return map[t] || '混合练习';
+        }
+
+    </script>
+</body>
+</html>

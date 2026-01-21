@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎒 趣学 - 凑十法/破十法/平十法练习</title>
+    <!-- 本地 Tailwind CSS -->
+    <script src="static/css/tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4A90E2',
+                        success: '#22C55E',
+                        warning: '#EF4444',
+                        bgStart: '#E0F2FE',
+                        bgCorrect: '#DCFCE7',
+                        bgWrong: '#FEE2E2'
+                    },
+                    fontFamily: {
+                        child: ['"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
+                        handwritten: ['"KaiTi"', '"STKaiti"', '"SimKai"', 'serif']
+                    },
+                    animation: {
+                        'bounce-gentle': 'bounceGentle 0.6s ease-out',
+                        'shake': 'shake 0.5s ease-in-out',
+                        'pop-in': 'popIn 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.4s ease-out'
+                    },
+                    keyframes: {
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.08)' }
+                        },
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '20%, 60%': { transform: 'translateX(-8px)' },
+                            '40%, 80%': { transform: 'translateX(8px)' }
+                        },
+                        popIn: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 50%, #F0FDF4 100%);
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+        }
+
+        /* 装饰背景 */
+        .decoration-bg {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50px;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .cloud-1 { width: 120px; height: 45px; top: 8%; left: -5%; opacity: 0.5; animation: float 8s ease-in-out infinite; }
+        .cloud-1::before { width: 60px; height: 60px; top: -30px; left: 20px; }
+        .cloud-1::after { width: 40px; height: 40px; top: -20px; left: 60px; }
+
+        .cloud-2 { width: 90px; height: 35px; top: 25%; right: -5%; opacity: 0.4; animation: float 10s ease-in-out infinite 1s; }
+        .cloud-2::before { width: 45px; height: 45px; top: -22px; left: 12px; }
+        .cloud-2::after { width: 32px; height: 32px; top: -15px; left: 45px; }
+
+        .cloud-3 { width: 70px; height: 28px; top: 55%; left: 10%; opacity: 0.5; animation: float 12s ease-in-out infinite 2s; }
+        .cloud-3::before { width: 35px; height: 35px; top: -18px; left: 10px; }
+        .cloud-3::after { width: 25px; height: 25px; top: -12px; left: 35px; }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(20px) translateY(-10px); }
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        /* 主答题区 */
+        .question-card {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+            border: 3px solid #E2E8F0;
+            transition: all 0.3s ease;
+        }
+
+        .question-card.correct {
+            border-color: #22C55E;
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+            animation: bounceGentle 0.5s ease;
+        }
+
+        .question-card.wrong {
+            border-color: #EF4444;
+            background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* 算式文字 */
+        .formula-text {
+            font-size: clamp(1.6rem, 7vw, 2.2rem);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        /* 算式数字使用手写风格字体 */
+        .formula-text .num {
+            font-family: 'KaiTi', 'STKaiti', 'SimKai', serif;
+            font-weight: bold;
+        }
+
+        /* 填空框 */
+        .blank-input {
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #CBD5E1;
+            border-radius: 8px;
+            outline: none;
+            background: #FFFFFF;
+            font-family: 'KaiTi', 'STKaiti', 'SimKai', serif;
+            color: #1E293B;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .blank-input:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+        }
+
+        .blank-input.active {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+        }
+
+        .blank-input.correct {
+            border-color: #22C55E;
+            background: #DCFCE7;
+        }
+
+        .blank-input.wrong {
+            border-color: #EF4444;
+            background: #FEE2E2;
+        }
+
+        /* ASCII布局样式 - 精确版 */
+        .ascii-container {
+            font-family: 'KaiTi', 'STKaiti', 'SimKai', serif;
+            font-size: 0;
+            display: inline-block;
+            text-align: center;
+            padding: 12px 16px;
+            background: #F8FAFC;
+            border-radius: 16px;
+            border: 2px solid #E2E8F0;
+        }
+
+        .ascii-line {
+            font-size: 1.2rem;
+            color: #64748B;
+            display: inline-block;
+            white-space: pre;
+        }
+
+        .ascii-num {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #1E293B;
+            display: inline-block;
+            min-width: 28px;
+        }
+
+        .ascii-bracket {
+            color: #64748B;
+            font-size: 1.4rem;
+        }
+
+        .ascii-blank {
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            /* border: 2px solid #CBD5E1;
+            border-radius: 8px; */
+            outline: none;
+            background: #FFFFFF;
+            font-family: 'KaiTi', 'STKaiti', 'SimKai', serif;
+            color: #1E293B;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .ascii-blank-72 {
+            width: 72px;
+            height: 36px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            /* border: 2px solid #CBD5E1;
+            border-radius: 8px; */
+            outline: none;
+            background: #FFFFFF;
+            font-family: 'KaiTi', 'STKaiti', 'SimKai', serif;
+            color: #1E293B;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .ascii-blank-54 {
+            width: 54px;
+            height: 36px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            /* border: 2px solid #CBD5E1;
+            border-radius: 8px; */
+            outline: none;
+            background: #FFFFFF;
+            font-family: 'KaiTi', 'STKaiti', 'SimKai', serif;
+            color: #1E293B;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .ascii-blank-answer {
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #CBD5E1;
+            border-radius: 8px;
+            outline: none;
+            background: #FFFFFF;
+            font-family: 'KaiTi', 'STKaiti', 'SimKai', serif;
+            color: #1E293B;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .ascii-blank-answer:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.15);
+        }
+
+        .ascii-blank-answer.correct {
+            border-color: #22C55E;
+            background: #DCFCE7;
+        }
+
+        .ascii-blank-answer.wrong {
+            border-color: #EF4444;
+            background: #FEE2E2;
+        }
+
+        /* 垂直连接线 */
+        .ascii-vline {
+            color: #64748B;
+            font-size: 1.2rem;
+        }
+
+        /* 数字键盘 */
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .numpad-btn {
+            height: 56px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            background: #FFFFFF;
+            color: #334155;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 2px solid #E2E8F0;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+
+        .numpad-btn:active {
+            transform: scale(0.94);
+        }
+
+        .numpad-btn.submit {
+            background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+            color: white;
+            border: none;
+        }
+
+        .numpad-btn.clear {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            border: none;
+        }
+
+        /* 选项按钮 */
+        .option-btn {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 2px solid #E2E8F0;
+            background: #FFFFFF;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .option-btn:hover {
+            border-color: #4A90E2;
+        }
+
+        .option-btn.active {
+            background: #4A90E2;
+            color: white;
+            border-color: #4A90E2;
+        }
+
+        /* 进度条 */
+        .progress-track {
+            height: 10px;
+            background: #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22C55E, #4ADE80, #22C55E);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        /* 开始/重新开始按钮 */
+        .action-btn {
+            background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .action-btn.restart {
+            background: linear-gradient(135deg, #4A90E2 0%, #3B82F6 100%);
+            box-shadow: 0 4px 16px rgba(74, 144, 226, 0.35);
+        }
+
+        .action-btn.restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        /* 统计卡片 */
+        .stat-box {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+            border-radius: 16px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 星星动画 */
+        .star-rating {
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+        }
+
+        .star {
+            display: inline-block;
+            animation: starPop 0.5s ease forwards;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .star:nth-child(1) { animation-delay: 0.1s; }
+        .star:nth-child(2) { animation-delay: 0.3s; }
+        .star:nth-child(3) { animation-delay: 0.5s; }
+
+        @keyframes starPop {
+            0% { opacity: 0; transform: scale(0) rotate(-180deg); }
+            60% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 360px) {
+            .formula-text { font-size: 1.4rem; }
+            .blank-input { width: 50px; height: 44px; font-size: 1.2rem; }
+            .numpad-btn { height: 48px; font-size: 1.2rem; }
+        }
+
+        /* 打印样式 */
+        @media print {
+            .no-print { display: none !important; }
+            .question-card { border: 2px solid #000; }
+        }
+    </style>
+</head>
+<body class="font-child text-slate-700 relative z-10">
+    <!-- 装饰背景 -->
+    <div class="decoration-bg">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6 max-w-lg relative z-10">
+        <!-- 头部 -->
+        <header class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <span class="text-4xl">🎒</span>
+                <h1 class="text-xl font-bold text-slate-800">凑十法/破十法/平十法</h1>
+            </div>
+            <button onclick="toggleHelp()"
+                    class="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-lg hover:scale-105 transition-transform no-print">
+                ❓
+            </button>
+        </header>
+
+        <!-- 设置区 (可折叠) -->
+        <div class="card p-5 mb-2 no-print">
+            <div class="flex items-center justify-between cursor-pointer" onclick="toggleSettings()">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">⚙️</span>
+                    <span class="font-bold text-slate-700">设置</span>
+                </div>
+                <svg id="settingsChevron" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+
+            <div id="settingsContent" class="space-y-4">
+                <!-- 练习方法 -->
+                <div>
+                    <p class="text-sm text-slate-500 mb-2 mt-2">练习方法</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setMethod('make-ten')" id="btn-make-ten"
+                                class="option-btn active">🔟 凑十法</button>
+                        <button onclick="setMethod('break-ten')" id="btn-break-ten"
+                                class="option-btn">💥 破十法</button>
+                        <button onclick="setMethod('flat-ten')" id="btn-flat-ten"
+                                class="option-btn">📐 平十法</button>
+                        <button onclick="setMethod('mixed')" id="btn-mixed"
+                                class="option-btn">🔀 混合</button>
+                    </div>
+                </div>
+
+                <!-- 题量 -->
+                <div>
+                    <p class="text-sm text-slate-500 mb-2">题量</p>
+                    <div class="flex gap-2">
+                        <button onclick="setCount(10)" id="btn-count-10"
+                                class="option-btn flex-1 active">10题</button>
+                        <button onclick="setCount(20)" id="btn-count-20"
+                                class="option-btn flex-1">20题</button>
+                        <button onclick="setCount(30)" id="btn-count-30"
+                                class="option-btn flex-1">30题</button>
+                    </div>
+                </div>
+
+                <!-- 音效 -->
+                <div class="flex items-center justify-between pt-2">
+                    <div class="flex items-center gap-2">
+                        <span>🔊</span>
+                        <span class="font-medium">音效</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="soundToggle" class="sr-only peer" onchange="toggleSound()">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 开始/重新开始按钮 -->
+        <button onclick="startPractice()" id="startBtn"
+                class="action-btn w-full py-4 rounded-2xl text-white text-lg font-bold transition-all mb-4 no-print">
+            🚀 开始练习
+        </button>
+
+        <button onclick="restartPractice()" id="restartBtn"
+                class="action-btn restart w-full py-4 rounded-2xl text-white text-lg font-bold transition-all mb-4 hidden">
+            🔄 重新开始
+        </button>
+
+        <!-- 答题区 -->
+        <div class="card p-6 mb-4" id="practiceArea">
+            <!-- 进度 -->
+            <div class="mb-4 no-print">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-slate-500">进度</span>
+                    <span id="progressText" class="font-semibold text-slate-700">0 / 10</span>
+                </div>
+                <div class="progress-track">
+                    <div id="progressBar" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 题目展示区 -->
+            <div id="questionCard" class="question-card rounded-2xl p-6 mb-4 text-center animate-fade-in">
+                <div id="questionDisplay" class="animate-fade-in">
+                    <div class="text-slate-400">👇 点击开始按钮开始练习</div>
+                </div>
+            </div>
+
+            <!-- 数字键盘 -->
+            <div class="numpad max-w-sm mx-auto no-print">
+                <button onclick="inputNum(1)" class="numpad-btn">1</button>
+                <button onclick="inputNum(2)" class="numpad-btn">2</button>
+                <button onclick="inputNum(3)" class="numpad-btn">3</button>
+                <button onclick="inputNum(4)" class="numpad-btn">4</button>
+                <button onclick="inputNum(5)" class="numpad-btn">5</button>
+                <button onclick="inputNum(6)" class="numpad-btn">6</button>
+                <button onclick="inputNum(7)" class="numpad-btn">7</button>
+                <button onclick="inputNum(8)" class="numpad-btn">8</button>
+                <button onclick="inputNum(9)" class="numpad-btn">9</button>
+                <button onclick="deleteNum()" class="numpad-btn clear">⌫</button>
+                <button onclick="inputNum(0)" class="numpad-btn">0</button>
+                <button onclick="submitAnswer()" class="numpad-btn submit">✓</button>
+            </div>
+        </div>
+
+        <!-- 统计区 -->
+        <div class="grid grid-cols-3 gap-4 mb-4 no-print" id="statsArea">
+            <div class="stat-box">
+                <div class="text-2xl font-bold text-green-500" id="correctCount">0</div>
+                <div class="text-xs text-slate-500 mt-1">正确</div>
+            </div>
+            <div class="stat-box">
+                <div class="text-2xl font-bold text-blue-500" id="accuracy">0%</div>
+                <div class="text-xs text-slate-500 mt-1">正确率</div>
+            </div>
+            <div class="stat-box">
+                <div class="text-2xl font-bold text-purple-500" id="timer">0:00</div>
+                <div class="text-xs text-slate-500 mt-1">用时</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助弹窗 -->
+    <div id="helpModal" class="fixed inset-0 modal-overlay z-50 hidden items-center justify-center p-4">
+        <div class="modal-content p-6 max-w-sm w-full animate-pop-in">
+            <h3 class="text-xl font-bold text-center mb-4">📖 使用说明</h3>
+            <div class="space-y-4 text-slate-600 text-sm">
+                <div class="bg-blue-50 p-3 rounded-xl">
+                    <p class="font-bold text-blue-700 mb-1">🔟 凑十法（加法）</p>
+                    <p>例：8 + 6 = 14</p>
+                    <p>把6分成2和4，先算8+2=10，再算10+4=14</p>
+                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;8&ensp;&ensp;+&ensp;&ensp;6&ensp;&ensp;=&ensp;[&ensp;14&ensp;]</p>
+                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;|&ensp;&ensp;&ensp;&ensp;/&ensp;\</p>
+                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;|&ensp;&ensp;[&ensp;2&ensp;]&ensp;[&ensp;4&ensp;]</p>
+                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;|&ensp;+&ensp;/&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;|</p>
+                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;└───&ensp;&ensp;&ensp;&ensp;+&ensp;&ensp;|</p>
+                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;10&ensp;&ensp;&ensp;────┘</p>
+                </div>
+                <div class="bg-red-50 p-3 rounded-xl">
+                    <p class="font-bold text-red-700 mb-1">💥 破十法（减法）</p>
+                    <p>例：15 - 7 = 8</p>
+                    <p>把15分成10和5，先算10-7=3，再算3+5=8</p>
+                </div>
+                <div class="bg-green-50 p-3 rounded-xl">
+                    <p class="font-bold text-green-700 mb-1">📐 平十法（减法）</p>
+                    <p>例：15 - 7 = 8</p>
+                    <p>把7分成5和2，先算15-5=10，再算10-2=8</p>
+                </div>
+            </div>
+            <button onclick="toggleHelp()"
+                    class="mt-6 w-full py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-colors">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <!-- 成就弹窗 -->
+    <div id="achievementModal" class="fixed inset-0 modal-overlay z-50 hidden items-center justify-center p-4">
+        <div class="modal-content p-8 max-w-sm w-full text-center animate-pop-in">
+            <div id="starRating" class="star-rating mb-4">⭐⭐⭐</div>
+            <h3 id="achievementTitle" class="text-2xl font-bold text-slate-800 mb-2">太棒了！</h3>
+            <p id="achievementText" class="text-slate-600 mb-6">全部正确！</p>
+
+            <div class="flex justify-center gap-8 mb-6">
+                <div>
+                    <div id="finalCorrect" class="text-3xl font-bold text-green-500">10</div>
+                    <div class="text-xs text-slate-500">正确</div>
+                </div>
+                <div>
+                    <div id="finalAccuracy" class="text-3xl font-bold text-blue-500">100%</div>
+                    <div class="text-xs text-slate-500">正确率</div>
+                </div>
+                <div>
+                    <div id="finalTime" class="text-3xl font-bold text-purple-500">0:45</div>
+                    <div class="text-xs text-slate-500">用时</div>
+                </div>
+            </div>
+
+            <button onclick="closeAchievement()"
+                    class="w-full py-4 bg-green-500 text-white rounded-2xl text-lg font-bold hover:bg-green-600 transition-colors">
+                🎮 再来一组
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ===== 状态 =====
+        let settings = {
+            method: 'make-ten',      // make-ten, break-ten, flat-ten, mixed
+            questionCount: 10,
+            soundEnabled: false
+        };
+
+        let practice = {
+            active: false,
+            currentQ: null,
+            index: 0,
+            correct: 0,
+            answered: 0,
+            startTime: null,
+            timerInterval: null,
+            focusId: null,
+        };
+
+        // ===== 音频 =====
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(type) {
+            if (!settings.soundEnabled || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } else {
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.type = 'sawtooth';
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            }
+        }
+
+        // ===== 设置存储 =====
+        function saveSettings() {
+            localStorage.setItem('quxue-maketen-settings', JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('quxue-maketen-settings');
+            if (saved) {
+                try { settings = { ...settings, ...JSON.parse(saved) }; } catch (e) {}
+            }
+            updateSettingsUI();
+        }
+
+        function updateSettingsUI() {
+            // 方法按钮
+            ['make-ten', 'break-ten', 'flat-ten', 'mixed'].forEach(m => {
+                const btn = document.getElementById(`btn-${m}`);
+                if (btn) btn.classList.toggle('active', settings.method === m);
+            });
+            // 题量按钮
+            [10, 20, 30].forEach(c => {
+                const btn = document.getElementById(`btn-count-${c}`);
+                if (btn) btn.classList.toggle('active', settings.questionCount === c);
+            });
+            document.getElementById('soundToggle').checked = settings.soundEnabled;
+        }
+
+        // ===== 设置函数 =====
+        function toggleSettings() {
+            const content = document.getElementById('settingsContent');
+            const chevron = document.getElementById('settingsChevron');
+            content.classList.toggle('hidden');
+            chevron.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        function setMethod(method) { settings.method = method; saveSettings(); updateSettingsUI(); }
+        function setCount(count) { settings.questionCount = count; saveSettings(); updateSettingsUI(); }
+        function toggleSound() {
+            settings.soundEnabled = document.getElementById('soundToggle').checked;
+            saveSettings();
+            if (settings.soundEnabled) initAudio();
+        }
+
+        // ===== 题目生成（20以内） =====
+        function generateQuestion() {
+            let method = settings.method;
+            if (method === 'mixed') {
+                const methods = ['make-ten', 'break-ten', 'flat-ten'];
+                method = methods[Math.floor(Math.random() * methods.length)];
+            }
+
+            let q = {};
+
+            if (method === 'make-ten') {
+                // 凑十法：20以内加法，10 < a + b <= 20
+                const a = Math.floor(Math.random() * 9) + 1;  // 1-9
+                const minB = Math.max(1, 10 - a + 1);
+                const maxB = Math.min(10, 20 - a);
+                const b = minB <= maxB ? Math.floor(Math.random() * (maxB - minB + 1)) + minB : maxB;
+                const splitNum = 10 - a;  // 凑十数
+                const remainNum = b - splitNum;  // 剩余数
+
+                q = {
+                    method: 'make-ten',
+                    a, b,
+                    answers: [a + b, splitNum, remainNum]
+                };
+
+            } else if (method === 'break-ten') {
+                // 破十法：20以内减法
+                const a = Math.floor(Math.random() * 11) + 10;  // 10-20
+                const b = Math.floor(Math.random() * (a - 1)) + 1;  // 1 到 a-1
+                const otherPart = a - 10;  // 10以外的部分
+                const afterMinus = 10 - b;  // 10-b的结果
+
+                if (afterMinus < 0) {
+                    return generateQuestion();
+                }
+
+                q = {
+                    method: 'break-ten',
+                    a, b,
+                    answers: [a - b, otherPart, afterMinus]
+                };
+
+            } else if (method === 'flat-ten') {
+                // 平十法：20以内减法
+                const a = Math.floor(Math.random() * 11) + 10;  // 10-20
+                const ones = a % 10;
+                const b = ones + Math.floor(Math.random() * (10-ones));
+                const firstMinus = ones;  // 先减的数
+                const secondMinus = b - ones;  // 后减的数
+
+                if (secondMinus < 0) {
+                    return generateQuestion();
+                }
+
+                q = {
+                    method: 'flat-ten',
+                    a, b, // firstMinus, secondMinus, afterFirst: 10,
+                    answers: [a - b, firstMinus, secondMinus]
+                };
+            }
+
+            return q;
+        }
+
+        // ===== 计时器 =====
+        function startTimer() {
+            practice.startTime = Date.now();
+            practice.timerInterval = setInterval(() => {
+                const s = Math.floor((Date.now() - practice.startTime) / 1000);
+                document.getElementById('timer').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        function stopTimer() { clearInterval(practice.timerInterval); }
+
+        // ===== 答题 =====
+        function startPractice() {
+            initAudio();
+            practice = {
+                active: true,
+                currentQ: generateQuestion(),
+                index: 1,
+                correct: 0,
+                answered: 0,
+                startTime: Date.now(),
+                timerInterval: null
+            };
+
+            startTimer();
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('restartBtn').classList.remove('hidden');
+            document.getElementById('practiceArea').classList.remove('hidden');
+            document.getElementById('statsArea').classList.remove('hidden');
+            showQuestion();
+            updateStats();
+        }
+
+        function restartPractice() {
+            // 重新开始练习，保持当前设置
+            practice = {
+                active: true,
+                currentQ: generateQuestion(),
+                index: 1,
+                correct: 0,
+                answered: 0,
+                startTime: Date.now(),
+                timerInterval: null,
+                focusId: null,
+            };
+
+            startTimer();
+            document.getElementById('restartBtn').classList.remove('hidden');
+            document.getElementById('practiceArea').classList.remove('hidden');
+            showQuestion();
+            updateStats();
+        }
+
+        function showQuestion() {
+            const q = practice.currentQ;
+            const methodName = q.method === 'make-ten' ? '凑十法' : (q.method === 'break-ten' ? '破十法' : '平十法');
+
+            let asciiHTML = '';
+
+            if (q.method === 'make-ten') {
+                // 凑十法: 8 + 4 = 12
+                //       8  +  4  = [ 12 ]
+                //       |    / \
+                //       |  [ 2 ] [ 2 ]
+                //       | + /      |
+                //       └───    +  |
+                //         10   ────┘
+                const a = q.a, b = q.b, splitNum = q.answers[1], remainNum = q.answers[2], finalAns = q.answers[0];
+
+                asciiHTML = `
+                <div class="ascii-container">
+                        <div id="r1" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="${a}">
+                            <input type="text" class="ascii-blank-72" maxlength="2" value="+">
+                            <input type="text" class="ascii-blank" maxlength="2" value="${b}">
+                            <input type="text" class="ascii-blank" maxlength="2" value="=">
+                            <input type="text" id="ans0" class="blank-input" onclick="setFocus('ans0')" maxlength="2" placeholder="?">
+                        </div>
+                        <div id="r2" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank-54" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="/">
+                            <input type="text" class="ascii-blank" maxlength="2" value="\\">
+                        </div>
+                        <div id="r3" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" id="ans1" class="blank-input" onclick="setFocus('ans1')" maxlength="2" placeholder="?">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" id="ans2" class="blank-input" onclick="setFocus('ans2')" maxlength="2" placeholder="?">
+                        </div>
+                        <div id="r4" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value="+">
+                            <input type="text" class="ascii-blank" maxlength="2" value="/">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                        </div>
+                        <div id="r5" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="└">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="+">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                        </div>
+                        <div id="r6" class="flex">
+                            <input type="text" class="ascii-blank-72" maxlength="2" value="10">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value="┘">
+                        </div>
+                </div>    
+                `;
+            } else if (q.method === 'break-ten') {
+                // 破十法: 14 - 7 = 7
+                //      14  -  7  = [ 7 ]
+                //     /  \    |
+                //  [ 4 ] [10] |
+                //    |    | - |
+                //    |    └───┘
+                //    |   [ 3 ]
+                //    |  +  |
+                //    └─────┘
+                const a = q.a, b = q.b;
+
+                asciiHTML = `
+                    <div class="ascii-container">
+                        <div id="r1" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="${a}">
+                            <input type="text" class="ascii-blank-72" maxlength="2" value="-">
+                            <input type="text" class="ascii-blank" maxlength="2" value="${b}">
+                            <input type="text" class="ascii-blank" maxlength="2" value="=">
+                            <input type="text" id="ans0" class="blank-input" onclick="setFocus('ans0')" maxlength="2" placeholder="?">
+                        </div>
+                        <div id="r2" class="flex">
+                            <input type="text" class="ascii-blank-54" style="width: 18px;" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="/">
+                            <input type="text" class="ascii-blank" maxlength="2" value="\\">
+                            <input type="text" class="ascii-blank-54" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                        </div>
+                        <div id="r3" class="flex">
+                            <input type="text" id="ans1" class="blank-input" onclick="setFocus('ans1')" maxlength="2" placeholder="?">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="10">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">    
+                        </div>
+                        <div id="r4" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value="-">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                        </div>
+                        <div id="r5" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="└">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value="┘">
+                        </div>
+                        <div id="r6" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" id="ans2" class="blank-input" onclick="setFocus('ans2')" maxlength="2" placeholder="?">
+                        </div>
+                        <div id="r7" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank-72" maxlength="2" value="+">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                        </div>
+                        <div id="r8" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="└">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value="┘">
+                        </div>
+                    </div>
+                
+                `;
+            } else if (q.method === 'flat-ten') {
+                // 平十法: 13 - 5 = 8
+                //      13  -  5  = [ 8 ]
+                //      |    /  \
+                //      | [ 3 ] [ 2 ]
+                //      | - |     |
+                //      └───┘  -  |
+                //       10 ──────┘
+                const a = q.a, b = q.b, firstMinus = q.firstMinus, secondMinus = q.secondMinus, finalAns = q.answers[1];
+
+                asciiHTML = `
+                    <div class="ascii-container">
+                        <div id="r1" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="${a}">
+                            <input type="text" class="ascii-blank-72" maxlength="2" value="-">
+                            <input type="text" class="ascii-blank" maxlength="2" value="${b}">
+                            <input type="text" class="ascii-blank" maxlength="2" value="=">
+                            <input type="text" id="ans0" class="blank-input" onclick="setFocus('ans0')" maxlength="2" placeholder="?">
+                        </div>
+                        <div id="r2" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank-54" style="width: 18px;" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="/">
+                            <input type="text" class="ascii-blank" maxlength="2" value="\\">
+                        </div>
+                        <div id="r3" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" id="ans1" class="blank-input" onclick="setFocus('ans1')" maxlength="2" placeholder="?">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" id="ans2" class="blank-input" onclick="setFocus('ans2')" maxlength="2" placeholder="?">   
+                        </div>
+                        <div id="r4" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value="-">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                        </div>
+                        <div id="r5" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value="└">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value="┘">
+                            <input type="text" class="ascii-blank" maxlength="2" value="-">
+                            <input type="text" class="ascii-blank" maxlength="2" value="|">
+                        </div>
+                        <div id="r6" class="flex">
+                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" value="10">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" value="┘">
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('questionDisplay').innerHTML = `
+                <div class="text-slate-400 text-sm mb-3">${methodName}</div>
+                ${asciiHTML}
+            `;
+
+            const card = document.getElementById('questionCard');
+            card.className = 'question-card rounded-2xl p-6 mb-4 text-center animate-fade-in';
+
+            // setTimeout(() => {
+            //     const firstInput = document.getElementById('ans0');
+            //     if (firstInput) firstInput.focus();
+            // }, 100);
+        }
+
+        function getAllAnswers() {
+            const answers = [];
+            let idx = 0;
+            while (document.getElementById('ans' + idx)) {
+                const val = document.getElementById('ans' + idx).value;
+                answers.push(val === '' ? null : parseInt(val));
+                idx++;
+            }
+            return answers;
+        }
+
+        function checkAllAnswers() {
+            const q = practice.currentQ;
+            const userAnswers = getAllAnswers();
+            const correctAnswers = q.answers;
+
+            let allCorrect = true;
+            for (let i = 0; i < correctAnswers.length; i++) {
+                const input = document.getElementById('ans' + i);
+                if (input && userAnswers[i] !== correctAnswers[i]) {
+                    allCorrect = false;
+                    input.classList.add('wrong');
+                } else if (input && userAnswers[i] === correctAnswers[i]) {
+                    input.classList.add('correct');
+                }
+            }
+
+            return allCorrect;
+        }
+
+        function setFocus(id) {
+            const originId = practice.focusId;
+            if (originId) {
+                document.getElementById(originId).classList.remove('active');
+            }
+            practice.focusId = id;
+            // document.querySelectorAll('.input-box').forEach(el => el.classList.remove('active', 'ring-2'));
+            const el = document.getElementById(id);
+            if(el) el.classList.add('active');
+        }
+
+        function inputNum(num) {
+            if (!practice.active) return;
+
+            if (practice.focusId === null) {
+                return;
+            }
+            // 找到当前焦点的输入框
+            const input = document.getElementById(practice.focusId);
+            if (input && input.value.length < 2) {
+                input.value += num;
+            }
+        }
+
+        function deleteNum() {
+            if (!practice.active) return;
+            if (practice.focusId === null) return;
+
+            const input = document.getElementById(practice.focusId);
+            if (input) {
+                input.value = input.value.slice(0, -1);
+            }
+        }
+
+        function clearAnswer() {
+            if (!practice.active) return;
+            const input = document.activeElement;
+            if (input && input.classList.contains('blank-input')) {
+                input.value = '';
+                input.classList.remove('correct', 'wrong');
+            }
+        }
+
+        function submitAnswer() {
+            if (!practice.active) return;
+
+            const isCorrect = checkAllAnswers();
+            practice.answered++;
+
+            const card = document.getElementById('questionCard');
+
+            if (isCorrect) {
+                practice.correct++;
+                playSound('correct');
+                card.classList.add('correct');
+                card.classList.remove('wrong');
+            } else {
+                playSound('wrong');
+                card.classList.add('wrong');
+                card.classList.remove('correct');
+            }
+
+            updateStats();
+
+            // 延迟后自动下一题
+            setTimeout(() => {
+                if (practice.index >= settings.questionCount) {
+                    finishPractice();
+                } else {
+                    practice.currentQ = generateQuestion();
+                    practice.index++;
+                    practice.focusId = null;
+                    updateStats();
+                    showQuestion();
+                }
+            }, isCorrect ? 800 : 1500);
+        }
+
+        function updateStats() {
+            document.getElementById('progressText').textContent = `${practice.index} / ${settings.questionCount}`;
+            document.getElementById('progressBar').style.width = `${(practice.index / settings.questionCount) * 100}%`;
+            document.getElementById('correctCount').textContent = practice.correct;
+            const acc = practice.answered > 0 ? Math.round((practice.correct / practice.answered) * 100) : 0;
+            document.getElementById('accuracy').textContent = `${acc}%`;
+        }
+
+        function finishPractice() {
+            practice.active = false;
+            stopTimer();
+
+            const acc = Math.round((practice.correct / settings.questionCount) * 100);
+            const elapsed = Math.floor((Date.now() - practice.startTime) / 1000);
+            const timeStr = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`;
+
+            let stars, title, text;
+            if (acc === 100) { stars = '⭐⭐⭐'; title = '太棒了！'; text = '全部正确，勇夺三星！'; }
+            else if (acc >= 80) { stars = '⭐⭐'; title = '很优秀！'; text = '再接再厉！'; }
+            else if (acc >= 60) { stars = '⭐'; title = '还不错！'; text = '继续加油！'; }
+            else { stars = '💪'; title = '继续努力！'; text = '多练几次会更好！'; }
+
+            document.getElementById('starRating').innerHTML = stars.split('').map(s => `<span class="star">${s}</span>`).join('');
+            document.getElementById('achievementTitle').textContent = title;
+            document.getElementById('achievementText').textContent = text;
+            document.getElementById('finalCorrect').textContent = practice.correct;
+            document.getElementById('finalAccuracy').textContent = `${acc}%`;
+            document.getElementById('finalTime').textContent = timeStr;
+
+            document.getElementById('achievementModal').classList.remove('hidden');
+            document.getElementById('achievementModal').classList.add('flex');
+        }
+
+        function closeAchievement() {
+            document.getElementById('achievementModal').classList.add('hidden');
+            document.getElementById('achievementModal').classList.remove('flex');
+            document.getElementById('restartBtn').classList.remove('hidden');
+            document.getElementById('practiceArea').classList.add('hidden');
+        }
+
+        // ===== 弹窗 =====
+        function toggleHelp() {
+            const m = document.getElementById('helpModal');
+            m.classList.toggle('hidden');
+            m.classList.toggle('flex');
+        }
+
+        // ===== 初始化 =====
+        window.onload = () => {
+            loadSettings();
+            document.getElementById('settingsContent').classList.add('hidden');
+            document.getElementById('settingsChevron').style.transform = 'rotate(0deg)';
+        };
+
+        document.getElementById('helpModal').addEventListener('click', e => { if (e.target === e.currentTarget) toggleHelp(); });
+        document.getElementById('achievementModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAchievement(); });
+
+        // 键盘支持
+        document.addEventListener('keydown', e => {
+            if (e.key >= '0' && e.key <= '9') {
+                inputNum(e.key);
+            } else if (e.key === 'Backspace') {
+                clearAnswer();
+            } else if (e.key === 'Enter') {
+                submitAnswer();
+            }
+        });
+
+        // 输入框聚焦和Tab切换
+        document.addEventListener('click', e => {
+            if (e.target.classList.contains('blank-input')) {
+                e.target.focus();
+            }
+        });
+    </script>
+</body>
+</html>

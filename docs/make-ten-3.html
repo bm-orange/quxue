@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣味数学练一练 (升级版)</title>
+    
+    <script src="static/css/tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pink-accent': '#F472B6', // 对应图片里的粉色
+                    },
+                    fontFamily: {
+                        'hand': ['"Comic Sans MS"', '"Chalkboard SE"', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        
+        /* 动画定义 */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .anim-shake { animation: shake 0.4s ease-in-out; }
+        .anim-pop { animation: pop 0.3s ease-in-out; }
+
+        /* 输入框样式定制 */
+        .input-box {
+            width: 3rem; height: 3rem;
+            text-align: center; font-size: 1.5rem; font-weight: bold;
+            border: 3px solid #F472B6; /* 粉色边框 */
+            border-radius: 0.5rem; color: #374151;
+            outline: none; transition: all 0.2s;
+            font-family: "Comic Sans MS", "Chalkboard SE", sans-serif;
+        }
+        .input-box:focus { border-color: #DB2777; box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.3); }
+        .input-box.error { border-color: #EF4444; color: #EF4444; background-color: #FEF2F2; }
+        .input-box.success { border-color: #10B981; color: #10B981; background-color: #ECFDF5; }
+
+        /* 主答案框特别样式 */
+        .main-answer-box { width: 4rem; height: 4rem; font-size: 2rem; border-width: 4px; }
+
+        /* 连接线绘制辅助类 */
+        .connector-v { position: relative; height: 1.5rem; width: 100%; }
+        .connector-v::before, .connector-v::after { content: ''; position: absolute; top: 0; width: 2px; height: 100%; background: #F472B6; }
+        .connector-v::before { left: 25%; transform: skewX(20deg); }
+        .connector-v::after { right: 25%; transform: skewX(-20deg); }
+        
+        .connector-straight { width: 2px; height: 1.5rem; background: #F472B6; margin: 0 auto; }
+        .connector-horiz-join { position: relative; height: 2rem; border-bottom: 3px solid #F472B6; margin-bottom: -3px;}
+        .connector-horiz-join::before { content:'+'; position: absolute; bottom: -0.8rem; left: 50%; transform: translateX(-50%); color: #F472B6; font-weight: bold;}
+    </style>
+</head>
+<body class="bg-yellow-50 text-gray-700 h-screen flex flex-col items-center overflow-hidden font-sans select-none">
+
+    <header class="w-full max-w-xl flex justify-between items-center p-4 z-20 relative">
+        <div class="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-soft font-hand">
+            <span class="text-xl">⭐</span>
+            <span id="scoreDisplay" class="text-xl font-bold text-yellow-500">0</span>
+        </div>
+        <button onclick="toggleSettings()" class="bg-white p-2 rounded-full shadow-soft text-gray-400 hover:text-blue-500 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </button>
+    </header>
+
+    <div id="settingsPanel" class="fixed top-0 left-0 w-full h-full bg-black/50 z-30 hidden flex items-start justify-center pt-20">
+        <div class="bg-white rounded-3xl w-[90%] max-w-md p-6 shadow-xl anim-pop">
+            <h2 class="text-2xl font-bold mb-6 text-center font-hand">设置练习模式</h2>
+            <div class="space-y-4">
+                <label class="flex items-center justify-between p-4 bg-blue-50 rounded-2xl cursor-pointer border-2 border-transparent hover:border-blue-300 transition">
+                    <span class="font-bold text-lg">🔀 混合练习 (推荐)</span>
+                    <input type="radio" name="practiceMode" value="mixed" class="w-6 h-6 text-blue-500">
+                </label>
+                <label class="flex items-center justify-between p-4 bg-pink-50 rounded-2xl cursor-pointer border-2 border-transparent hover:border-pink-300 transition">
+                    <span class="font-bold text-lg">➕ 凑十法 (加法)</span>
+                    <input type="radio" name="practiceMode" value="make-ten" class="w-6 h-6 text-pink-500">
+                </label>
+                <label class="flex items-center justify-between p-4 bg-green-50 rounded-2xl cursor-pointer border-2 border-transparent hover:border-green-300 transition">
+                    <span class="font-bold text-lg">➖ 破十法 (减法)</span>
+                    <input type="radio" name="practiceMode" value="break-ten" class="w-6 h-6 text-green-500">
+                </label>
+                <label class="flex items-center justify-between p-4 bg-purple-50 rounded-2xl cursor-pointer border-2 border-transparent hover:border-purple-300 transition">
+                    <span class="font-bold text-lg">➖ 平十法 (减法)</span>
+                    <input type="radio" name="practiceMode" value="flat-ten" class="w-6 h-6 text-purple-500">
+                </label>
+            </div>
+            <button onclick="saveSettings()" class="w-full mt-8 bg-blue-500 text-white py-4 rounded-2xl text-xl font-bold shadow-md active:scale-95 transition">确认开始</button>
+        </div>
+    </div>
+
+    <main class="flex-1 w-full max-w-xl px-4 flex flex-col items-center justify-start pt-4 pb-8">
+        
+        <div id="problemCard" class="bg-white w-full rounded-[2rem] shadow-soft p-8 relative transition-all duration-300 pb-12">
+            <div id="methodTitle" class="absolute top-4 left-0 w-full text-center text-pink-400 font-bold font-hand opacity-50"></div>
+
+            <div id="visualizationArea" class="flex flex-col items-center justify-center font-hand text-4xl font-bold mt-6 space-y-6">
+                </div>
+
+        </div>
+
+        <div id="feedbackMsg" class="h-12 flex items-center justify-center text-xl font-bold text-center my-4 opacity-0 transition-opacity font-hand"></div>
+
+    </main>
+
+    <div class="w-full max-w-xl bg-white rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] p-6 z-10">
+        <div class="grid grid-cols-3 gap-4">
+            <button class="key-btn" onclick="typeNumber(1)">1</button>
+            <button class="key-btn" onclick="typeNumber(2)">2</button>
+            <button class="key-btn" onclick="typeNumber(3)">3</button>
+            <button class="key-btn" onclick="typeNumber(4)">4</button>
+            <button class="key-btn" onclick="typeNumber(5)">5</button>
+            <button class="key-btn" onclick="typeNumber(6)">6</button>
+            <button class="key-btn" onclick="typeNumber(7)">7</button>
+            <button class="key-btn" onclick="typeNumber(8)">8</button>
+            <button class="key-btn" onclick="typeNumber(9)">9</button>
+            <button class="key-btn bg-gray-100 text-gray-500 border-gray-200" onclick="backspace()">⌫</button>
+            <button class="key-btn" onclick="typeNumber(0)">0</button>
+            <button class="key-btn bg-green-500 text-white border-green-600 shadow-green-200/50" onclick="checkFullAnswer()">OK</button>
+        </div>
+    </div>
+
+    <style>
+        .key-btn {
+            @apply bg-blue-50 text-blue-600 rounded-2xl p-4 text-3xl font-bold font-hand active:scale-95 transition-all shadow-sm border-b-[3px] border-blue-200;
+            height: 4.5rem;
+        }
+    </style>
+
+    <script>
+        // --- 全局状态 ---
+        const state = {
+            score: parseInt(localStorage.getItem('math_score_v2') || 0),
+            mode: localStorage.getItem('math_mode_v2') || 'mixed',
+            currentProblem: null, // 存储当前题目的数字、方法和预期答案
+            focusedInputId: null, // 当前光标所在的输入框ID
+        };
+
+        // --- 初始化与设置 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateScoreUI();
+            initSettingsRadio();
+            generateProblem();
+            setupInputFocusHandlers();
+        });
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function initSettingsRadio() {
+            const radios = document.getElementsByName('practiceMode');
+            radios.forEach(radio => {
+                if (radio.value === state.mode) radio.checked = true;
+            });
+        }
+
+        function saveSettings() {
+            const radios = document.getElementsByName('practiceMode');
+            radios.forEach(radio => {
+                if (radio.checked) state.mode = radio.value;
+            });
+            localStorage.setItem('math_mode_v2', state.mode);
+            toggleSettings();
+            generateProblem();
+            showFeedback("模式已切换！准备开始...", "text-blue-500");
+        }
+
+        // --- 核心业务：生成题目 ---
+        function generateProblem() {
+            resetUI();
+            
+            let methodStr = state.mode;
+            if (methodStr === 'mixed') {
+                const methods = ['make-ten', 'break-ten', 'flat-ten'];
+                methodStr = methods[Math.floor(Math.random() * methods.length)];
+            }
+
+            let p = { num1: 0, num2: 0, operator: '', answer: 0, method: methodStr, expectedInputs: [] };
+
+            switch (methodStr) {
+                case 'make-ten': // 凑十法 (e.g., 8 + 4)
+                    p.operator = '+';
+                    p.num1 = Math.floor(Math.random() * 8) + 2; // 2-9
+                    let minNum2 = 11 - p.num1; if (minNum2 < 2) minNum2 = 2;
+                    p.num2 = Math.floor(Math.random() * (9 - minNum2 + 1)) + minNum2;
+                    if (p.num1 + p.num2 < 11) p.num2 = 11 - p.num1; // 确保进位
+                    p.answer = p.num1 + p.num2;
+                    // 预期输入: [拆分出的补数, 拆分出的剩余数, 最终结果]
+                    // 逻辑：判断谁大凑谁。默认凑num1。
+                    let need = 10 - p.num1;
+                    p.expectedInputs = [need, p.num2 - need, p.answer]; 
+                    break;
+
+                case 'break-ten': // 破十法 (e.g., 12 - 5)
+                    p.operator = '-';
+                    p.num1 = Math.floor(Math.random() * 8) + 11; // 11-18
+                    p.num2 = Math.floor(Math.random() * (9 - (p.num1 % 10) + 1)) + (p.num1 % 10);
+                    if(p.num2 <= p.num1 % 10) p.num2 = p.num1 % 10 + 1; // 确保退位
+                    p.answer = p.num1 - p.num2;
+                    // 预期输入: [10减减数的结果, 个位, 最终结果]
+                    p.expectedInputs = [10 - p.num2, p.num1 % 10, p.answer];
+                    break;
+                    
+                case 'flat-ten': // 平十法 (e.g., 12 - 5)
+                    p.operator = '-';
+                    p.num1 = Math.floor(Math.random() * 8) + 11;
+                    p.num2 = Math.floor(Math.random() * (9 - (p.num1 % 10) + 1)) + (p.num1 % 10);
+                    if(p.num2 <= p.num1 % 10) p.num2 = p.num1 % 10 + 1;
+                    p.answer = p.num1 - p.num2;
+                    // 预期输入: [被减数个位, 减数剩余部分, 最终结果]
+                    p.expectedInputs = [p.num1 % 10, p.num2 - (p.num1 % 10), p.answer];
+                    break;
+            }
+
+            state.currentProblem = p;
+            renderVisualization(p);
+            // 默认聚焦第一个输入框
+            setTimeout(() => document.querySelector('.input-box')?.click(), 100);
+        }
+
+        // --- 核心业务：渲染可视化填空区 (实现图片样式) ---
+        function renderVisualization(p) {
+            const container = document.getElementById('visualizationArea');
+            document.getElementById('methodTitle').innerText = getMethodName(p.method);
+            
+            let html = '';
+            // 通用主算式部分
+            const mainEqStr = `
+                <div class="flex items-center justify-center space-x-2 mb-4 relative z-10">
+                    <span>${p.num1}</span>
+                    <span>${p.operator}</span>
+                    <span>${p.num2}</span>
+                    <span>=</span>
+                    <input type="tel" id="input-final" class="input-box main-answer-box" readonly>
+                </div>
+            `;
+
+            if (p.method === 'make-ten') {
+                // 凑十法结构 (类似图片)
+                html = `
+                    ${mainEqStr}
+                    <div class="flex justify-center gap-6 -mt-4 relative">
+                        <div class="flex flex-col items-center">
+                            <div class="connector-straight"></div>
+                            <span class="text-pink-accent font-bold mt-1">10</span>
+                        </div>
+                        <div class="flex flex-col items-center relative top-2">
+                            <div class="connector-v"></div>
+                            <div class="flex gap-3 mt-1">
+                                <input type="tel" id="input-step1" class="input-box" readonly>
+                                <input type="tel" id="input-step2" class="input-box" readonly>
+                            </div>
+                             <div class="absolute top-full left-0 w-full h-8">
+                                <div class="connector-horiz-join w-[160%] -ml-[130%]"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (p.method === 'break-ten') {
+                // 破十法结构
+                html = `
+                    ${mainEqStr}
+                    <div class="flex justify-center gap-4 -mt-4 relative">
+                        <div class="flex flex-col items-center relative top-2">
+                            <div class="connector-v"></div>
+                            <div class="flex gap-3 mt-1">
+                                <span class="text-pink-accent font-bold">10</span>
+                                <span>${p.num1 % 10}</span>
+                            </div>
+                             <div class="absolute top-full left-0 w-full h-8">
+                                <div class="connector-horiz-join w-[110%] ml-[20%]"></div>
+                            </div>
+                        </div>
+                         <div class="flex flex-col items-center">
+                            <div class="connector-straight h-10"></div>
+                            <div class="text-sm text-pink-accent absolute top-[1.8rem] bg-white px-1">-</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center gap-4 mt-6">
+                         <div class="flex items-center"><input type="tel" id="input-step1" class="input-box" readonly></div>
+                         <div class="flex items-center">+</div>
+                         <div class="flex items-center"><input type="tel" id="input-step2" class="input-box" readonly></div>
+                    </div>
+                `;
+            }
+            else if (p.method === 'flat-ten') {
+                // 平十法结构
+                html = `
+                    ${mainEqStr}
+                     <div class="flex justify-center gap-4 -mt-4 relative">
+                        <div class="flex flex-col items-center">
+                            <div class="connector-straight"></div>
+                        </div>
+                         <div class="flex flex-col items-center relative top-2">
+                            <div class="connector-v"></div>
+                            <div class="flex gap-3 mt-1 relative">
+                                <input type="tel" id="input-step1" class="input-box" readonly>
+                                <input type="tel" id="input-step2" class="input-box" readonly>
+                                <div class="absolute -left-6 top-2 text-pink-accent">-</div>
+                                <div class="absolute left-[3.2rem] top-2 text-pink-accent">-</div>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="flex justify-center mt-6">
+                         <span class="text-pink-accent font-bold mr-2">10</span> 
+                         <span> - </span>
+                         <span class="ml-2" id="flat-ten-left-display">?</span>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+            setupInputFocusHandlers(); // 重新绑定事件
+        }
+
+
+        // --- 交互逻辑：虚拟键盘与焦点管理 ---
+        function setupInputFocusHandlers() {
+            document.querySelectorAll('.input-box').forEach(input => {
+                input.addEventListener('click', (e) => {
+                    // 移除其他输入框的焦点样式
+                    document.querySelectorAll('.input-box').forEach(el => el.classList.remove('border-pink-500', 'ring-2'));
+                    // 设置当前焦点
+                    state.focusedInputId = e.target.id;
+                    // e.target.classList.add('border-pink-500', 'ring-2', 'ring-pink-200');
+                    // 平十法特殊处理：更新下方显示
+                    if (state.currentProblem.method === 'flat-ten' && e.target.id === 'input-step2') {
+                        document.getElementById('flat-ten-left-display').innerText = e.target.value || '?';
+                    }
+                });
+            });
+            // 如果没有焦点，默认聚焦第一个
+            if (!state.focusedInputId) {
+                 const firstBtn = document.querySelector('.input-box');
+                 if(firstBtn) firstBtn.click();
+            }
+        }
+
+        function typeNumber(num) {
+            if (!state.focusedInputId) return;
+            const input = document.getElementById(state.focusedInputId);
+            if (input.value.length >= 2) return; // 最多2位
+            input.value += num;
+            input.classList.remove('error', 'success'); // 输入时清除错误状态
+            
+            // 平十法联动显示
+            if (state.currentProblem.method === 'flat-ten' && state.focusedInputId === 'input-step2') {
+                document.getElementById('flat-ten-left-display').innerText = input.value;
+            }
+        }
+
+        function backspace() {
+            if (!state.focusedInputId) return;
+            const input = document.getElementById(state.focusedInputId);
+            input.value = input.value.slice(0, -1);
+            input.classList.remove('error', 'success');
+             // 平十法联动显示
+             if (state.currentProblem.method === 'flat-ten' && state.focusedInputId === 'input-step2') {
+                document.getElementById('flat-ten-left-display').innerText = input.value || '?';
+            }
+        }
+
+
+        // --- 核心逻辑：全流程验证 ---
+        function checkFullAnswer() {
+            const p = state.currentProblem;
+            const step1Input = document.getElementById('input-step1');
+            const step2Input = document.getElementById('input-step2');
+            const finalInput = document.getElementById('input-final');
+            
+            const inputs = [step1Input, step2Input, finalInput];
+            
+            // 1. 检查是否全部填满
+            for (let input of inputs) {
+                if (!input || input.value === '') {
+                    showFeedback("还有空格没填哦，加油！", "text-yellow-500", true);
+                    input?.click(); // 聚焦到未填的框
+                    return;
+                }
+            }
+
+            // 2. 验证逻辑 (按顺序对比预期值)
+            let allCorrect = true;
+            inputs.forEach((input, index) => {
+                const userVal = parseInt(input.value);
+                const expectedVal = p.expectedInputs[index];
+
+                if (userVal !== expectedVal) {
+                    input.classList.add('error', 'anim-shake');
+                    allCorrect = false;
+                } else {
+                    input.classList.add('success');
+                    input.classList.remove('error');
+                }
+            });
+
+            if (allCorrect) {
+                // 全部正确
+                state.score += 10;
+                updateScoreUI();
+                saveProgress();
+                showFeedback("太棒了！全对！🌟", "text-green-500", false, true);
+                document.getElementById('problemCard').classList.add('border-green-200', 'bg-green-50');
+                setTimeout(generateProblem, 1500);
+            } else {
+                // 有错误
+                showFeedback("有地方填错了，仔细检查一下红色的框框 👀", "text-red-400", true);
+            }
+        }
+
+
+        // --- 通用辅助函数 ---
+        function showFeedback(text, colorClass, isShake = false, isPop = false) {
+            const fb = document.getElementById('feedbackMsg');
+            fb.innerText = text;
+            fb.className = `h-12 flex items-center justify-center text-xl font-bold text-center my-4 transition-opacity font-hand ${colorClass}`;
+            fb.style.opacity = '1';
+            if (isShake) fb.classList.add('anim-shake');
+            if (isPop) fb.classList.add('anim-pop');
+            setTimeout(() => fb.classList.remove('anim-shake', 'anim-pop'), 500);
+        }
+
+        function resetUI() {
+            state.focusedInputId = null;
+            document.getElementById('feedbackMsg').style.opacity = '0';
+            const card = document.getElementById('problemCard');
+            card.classList.remove('border-green-200', 'bg-green-50');
+        }
+
+        function updateScoreUI() {
+            document.getElementById('scoreDisplay').innerText = state.score;
+        }
+        
+        function saveProgress() {
+            localStorage.setItem('math_score_v2', state.score);
+        }
+
+        function getMethodName(m) {
+            switch(m) {
+                case 'make-ten': return '凑十法 (找好朋友凑成10)';
+                case 'break-ten': return '破十法 (先用10去减)';
+                case 'flat-ten': return '平十法 (先把个位减掉)';
+                default: return '';
+            }
+        }
+
+    </script>
+</body>
+</html>

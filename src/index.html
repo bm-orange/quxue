@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣学教育 - 数学练习</title>
+    <!-- 本地 Tailwind CSS -->
+    <script src="static/css/tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4A90E2',
+                        success: '#22C55E',
+                        warning: '#EF4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .page-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .page-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12 max-w-4xl">
+        <!-- 标题 -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🎒 趣学教育</h1>
+            <p class="text-gray-600">选择你想要练习的内容</p>
+        </div>
+
+        <!-- 页面索引列表 - 由构建脚本自动生成 -->
+        <div id="page-list" class="grid gap-4 md:grid-cols-2">
+            {{PAGE_LIST}}
+        </div>
+
+        <!-- 页脚 -->
+        <div class="text-center mt-12 text-gray-500 text-sm">
+            <p>趣学教育 - 让学习更有趣</p>
+        </div>
+    </div>
+
+    <!-- 构建脚本注入的索引数据 -->
+    <script>
+        const pages = {{PAGE_DATA}};
+        const pageList = document.getElementById('page-list');
+        pageList.innerHTML = pages.map(page => `
+            <a href="${page.url}" class="page-card block bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">${page.title}</h2>
+                <p class="text-gray-500 text-sm">${page.desc}</p>
+            </a>
+        `).join('');
+    </script>
+</body>
+</html>

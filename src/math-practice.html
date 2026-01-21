@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎒 趣学 - 10以内加减法</title>
+    <!-- 本地 Tailwind CSS -->
+    <script src="static/css/tailwind.css"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4A90E2',
+                        success: '#22C55E',
+                        warning: '#EF4444',
+                        bgStart: '#E0F2FE',
+                        bgCorrect: '#DCFCE7',
+                        bgWrong: '#FEE2E2'
+                    },
+                    fontFamily: {
+                        child: ['"PingFang SC"', '"Microsoft YaHei"', '"Noto Sans SC"', 'sans-serif'],
+                        handwritten: ['"KaiTi"', '"STKaiti"', '"SimKai"', '"Microsoft YaHei"', 'serif']
+                    },
+                    animation: {
+                        'bounce-gentle': 'bounceGentle 0.6s ease-out',
+                        'shake': 'shake 0.5s ease-in-out',
+                        'pop-in': 'popIn 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.4s ease-out'
+                    },
+                    keyframes: {
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.08)' }
+                        },
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '20%, 60%': { transform: 'translateX(-8px)' },
+                            '40%, 80%': { transform: 'translateX(8px)' }
+                        },
+                        popIn: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #F0F9FF 0%, #E0F2FE 50%, #F0FDF4 100%);
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+        }
+
+        /* 装饰背景 */
+        .decoration-bg {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50px;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .cloud-1 { width: 120px; height: 45px; top: 8%; left: -5%; opacity: 0.5; animation: float 8s ease-in-out infinite; }
+        .cloud-1::before { width: 60px; height: 60px; top: -30px; left: 20px; }
+        .cloud-1::after { width: 40px; height: 40px; top: -20px; left: 60px; }
+
+        .cloud-2 { width: 90px; height: 35px; top: 25%; right: -5%; opacity: 0.4; animation: float 10s ease-in-out infinite 1s; }
+        .cloud-2::before { width: 45px; height: 45px; top: -22px; left: 12px; }
+        .cloud-2::after { width: 32px; height: 32px; top: -15px; left: 45px; }
+
+        .cloud-3 { width: 70px; height: 28px; top: 55%; left: 10%; opacity: 0.5; animation: float 12s ease-in-out infinite 2s; }
+        .cloud-3::before { width: 35px; height: 35px; top: -18px; left: 10px; }
+        .cloud-3::after { width: 25px; height: 25px; top: -12px; left: 35px; }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(20px) translateY(-10px); }
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        /* 主答题区 */
+        .question-card {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+            border: 3px solid #E2E8F0;
+            transition: all 0.3s ease;
+        }
+
+        .question-card.correct {
+            border-color: #22C55E;
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+            animation: bounceGentle 0.5s ease;
+        }
+
+        .question-card.wrong {
+            border-color: #EF4444;
+            background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .question-text {
+            font-size: clamp(2.5rem, 10vw, 4rem);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        /* 题目数字使用手写风格字体 */
+        .question-text span:first-child,
+        .question-text span:nth-child(3) {
+            font-family: 'KaiTi', 'STKaiti', 'SimKai', serif;
+            font-weight: bold;
+        }
+
+        /* 输入框 */
+        .answer-input {
+            width: 100px;
+            height: 80px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            border: 4px solid #CBD5E1;
+            border-radius: 16px;
+            outline: none;
+            transition: all 0.2s ease;
+            background: #FFFFFF;
+        }
+
+        .answer-input:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+        }
+
+        /* 数字键盘 */
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .numpad-btn {
+            height: 62px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            background: #FFFFFF;
+            color: #334155;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 2px solid #E2E8F0;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+
+        .numpad-btn:active {
+            transform: scale(0.94);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        .numpad-btn.submit {
+            background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+            color: white;
+            border: none;
+        }
+
+        .numpad-btn.clear {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            border: none;
+        }
+
+        /* 选项按钮 */
+        .option-btn {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 2px solid #E2E8F0;
+            background: #FFFFFF;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .option-btn:hover {
+            border-color: #4A90E2;
+        }
+
+        .option-btn.active {
+            background: #4A90E2;
+            color: white;
+            border-color: #4A90E2;
+        }
+
+        /* 进度条 */
+        .progress-track {
+            height: 10px;
+            background: #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22C55E, #4ADE80, #22C55E);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            transition: width 0.4s ease;
+            animation: progressShimmer 2s linear infinite;
+        }
+
+        @keyframes progressShimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        /* 开始按钮 */
+        .start-btn {
+            background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .start-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 统计卡片 */
+        .stat-box {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 星星动画 */
+        .star-rating {
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+        }
+
+        .star {
+            display: inline-block;
+            animation: starPop 0.5s ease forwards;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .star:nth-child(1) { animation-delay: 0.1s; }
+        .star:nth-child(2) { animation-delay: 0.3s; }
+        .star:nth-child(3) { animation-delay: 0.5s; }
+
+        @keyframes starPop {
+            0% { opacity: 0; transform: scale(0) rotate(-180deg); }
+            60% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0); }
+        }
+
+        /* 响应式 */
+        @media (max-width: 360px) {
+            .question-text { font-size: 2.2rem; }
+            .answer-input { width: 80px; height: 70px; font-size: 2rem; }
+            .numpad-btn { height: 54px; font-size: 1.3rem; }
+        }
+
+        /* 打印样式 */
+        @media print {
+            .no-print { display: none !important; }
+            .question-card { border: 2px solid #000; }
+        }
+    </style>
+</head>
+<body class="font-child text-slate-700 relative z-10">
+    <!-- 装饰背景 -->
+    <div class="decoration-bg">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6 max-w-lg">
+        <!-- 头部 -->
+        <header class="flex items-center justify-between mb-6 no-print">
+            <div class="flex items-center gap-3">
+                <span class="text-4xl">🎒</span>
+                <h1 class="text-xl font-bold text-slate-800">趣学加减法</h1>
+            </div>
+            <button onclick="toggleHelp()"
+                    class="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-lg hover:scale-105 transition-transform">
+                ❓
+            </button>
+        </header>
+
+        <!-- 设置区 (可折叠) -->
+        <div class="card p-5 mb-5 no-print">
+            <div class="flex items-center justify-between mb-4 cursor-pointer" onclick="toggleSettings()">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">⚙️</span>
+                    <span class="font-bold text-slate-700">设置</span>
+                </div>
+                <svg id="settingsChevron" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+
+            <div id="settingsContent" class="space-y-4">
+                <!-- 题型 -->
+                <div>
+                    <p class="text-sm text-slate-500 mb-2">题型</p>
+                    <div class="flex gap-2">
+                        <button onclick="setQuestionType('add')" id="btn-add"
+                                class="option-btn flex-1 active">➕ 加法</button>
+                        <button onclick="setQuestionType('sub')" id="btn-sub"
+                                class="option-btn flex-1">➖ 减法</button>
+                        <button onclick="setQuestionType('mixed')" id="btn-mixed"
+                                class="option-btn flex-1">🔀 混合</button>
+                    </div>
+                </div>
+
+                <!-- 难度 -->
+                <div>
+                    <p class="text-sm text-slate-500 mb-2">范围</p>
+                    <div class="flex gap-2">
+                        <button onclick="setRange(10)" id="btn-range-10"
+                                class="option-btn flex-1 active">📗 10以内</button>
+                        <button onclick="setRange(20)" id="btn-range-20"
+                                class="option-btn flex-1">📙 20以内</button>
+                    </div>
+                </div>
+
+                <!-- 题量 -->
+                <div>
+                    <p class="text-sm text-slate-500 mb-2">题量</p>
+                    <div class="flex gap-2">
+                        <button onclick="setCount(10)" id="btn-count-10"
+                                class="option-btn flex-1 active">10题</button>
+                        <button onclick="setCount(20)" id="btn-count-20"
+                                class="option-btn flex-1">20题</button>
+                        <button onclick="setCount(50)" id="btn-count-50"
+                                class="option-btn flex-1">50题</button>
+                    </div>
+                </div>
+
+                <!-- 音效 -->
+                <div class="flex items-center justify-between pt-2">
+                    <div class="flex items-center gap-2">
+                        <span>🔊</span>
+                        <span class="font-medium">音效</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="soundToggle" class="sr-only peer" onchange="toggleSound()">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 答题区 -->
+        <div class="card p-8 mb-5">
+            <!-- 进度 -->
+            <div class="mb-6 no-print">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-slate-500">进度</span>
+                    <span id="progressText" class="font-semibold text-slate-700">0 / 10</span>
+                </div>
+                <div class="progress-track">
+                    <div id="progressBar" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- 题目 -->
+            <div id="questionCard" class="question-card rounded-3xl p-8 mb-6 text-center">
+                <div id="questionDisplay" class="animate-fade-in">
+                    <div class="text-slate-400 mb-4">👇 点击下方开始按钮开始练习</div>
+                </div>
+            </div>
+
+            <!-- 数字键盘 -->
+            <div id="inputSection" class="hidden mt-4">
+                <div class="numpad max-w-sm mx-auto">
+                    <button onclick="inputNum(1)" class="numpad-btn">1</button>
+                    <button onclick="inputNum(2)" class="numpad-btn">2</button>
+                    <button onclick="inputNum(3)" class="numpad-btn">3</button>
+                    <button onclick="inputNum(4)" class="numpad-btn">4</button>
+                    <button onclick="inputNum(5)" class="numpad-btn">5</button>
+                    <button onclick="inputNum(6)" class="numpad-btn">6</button>
+                    <button onclick="inputNum(7)" class="numpad-btn">7</button>
+                    <button onclick="inputNum(8)" class="numpad-btn">8</button>
+                    <button onclick="inputNum(9)" class="numpad-btn">9</button>
+                    <button onclick="clearAnswer()" class="numpad-btn clear">⌫</button>
+                    <button onclick="inputNum(0)" class="numpad-btn">0</button>
+                    <button onclick="submitAnswer()" class="numpad-btn submit">✓</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计区 -->
+        <div class="grid grid-cols-3 gap-4 mb-5 no-print">
+            <div class="stat-box">
+                <div class="text-2xl font-bold text-green-500" id="correctCount">0</div>
+                <div class="text-xs text-slate-500 mt-1">正确</div>
+            </div>
+            <div class="stat-box">
+                <div class="text-2xl font-bold text-blue-500" id="accuracy">0%</div>
+                <div class="text-xs text-slate-500 mt-1">正确率</div>
+            </div>
+            <div class="stat-box">
+                <div class="text-2xl font-bold text-purple-500" id="timer">0:00</div>
+                <div class="text-xs text-slate-500 mt-1">用时</div>
+            </div>
+        </div>
+
+        <!-- 按钮区 -->
+        <div class="flex gap-4 no-print">
+            <button onclick="startPractice()" id="startBtn"
+                    class="start-btn flex-1 py-4 rounded-2xl text-white text-lg font-bold transition-all">
+                🚀 开始练习
+            </button>
+            <button onclick="resetPractice()" id="resetBtn"
+                    class="hidden flex-1 py-4 bg-slate-200 text-slate-700 rounded-2xl text-lg font-bold hover:bg-slate-300 transition-all">
+                🔄 重新开始
+            </button>
+        </div>
+    </div>
+
+    <!-- 帮助弹窗 -->
+    <div id="helpModal" class="fixed inset-0 modal-overlay z-50 hidden items-center justify-center p-4">
+        <div class="modal-content p-6 max-w-sm w-full animate-pop-in">
+            <h3 class="text-xl font-bold text-center mb-4">📖 使用说明</h3>
+            <div class="space-y-3 text-slate-600 text-sm">
+                <p>1. 先设置题型和难度</p>
+                <p>2. 点击「开始练习」进入答题</p>
+                <p>3. 用数字键盘输入答案</p>
+                <p>4. 点击 ✓ 提交，自动判分</p>
+                <p>5. 完成所有题目查看成绩</p>
+            </div>
+            <button onclick="toggleHelp()"
+                    class="mt-6 w-full py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-colors">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <!-- 成就弹窗 -->
+    <div id="achievementModal" class="fixed inset-0 modal-overlay z-50 hidden items-center justify-center p-4">
+        <div class="modal-content p-8 max-w-sm w-full text-center animate-pop-in">
+            <div id="starRating" class="star-rating mb-4">⭐⭐⭐</div>
+            <h3 id="achievementTitle" class="text-2xl font-bold text-slate-800 mb-2">太棒了！</h3>
+            <p id="achievementText" class="text-slate-600 mb-6">全部正确！</p>
+
+            <div class="flex justify-center gap-8 mb-6">
+                <div>
+                    <div id="finalCorrect" class="text-3xl font-bold text-green-500">10</div>
+                    <div class="text-xs text-slate-500">正确</div>
+                </div>
+                <div>
+                    <div id="finalAccuracy" class="text-3xl font-bold text-blue-500">100%</div>
+                    <div class="text-xs text-slate-500">正确率</div>
+                </div>
+                <div>
+                    <div id="finalTime" class="text-3xl font-bold text-purple-500">0:45</div>
+                    <div class="text-xs text-slate-500">用时</div>
+                </div>
+            </div>
+
+            <button onclick="closeAchievement()"
+                    class="w-full py-4 bg-green-500 text-white rounded-2xl text-lg font-bold hover:bg-green-600 transition-colors">
+                🎮 再来一组
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ===== 状态 =====
+        let settings = {
+            questionType: 'add',
+            range: 10,
+            questionCount: 10,
+            soundEnabled: false
+        };
+
+        let practice = {
+            active: false,
+            currentQ: null,
+            index: 0,
+            correct: 0,
+            answered: 0,
+            startTime: null,
+            timerInterval: null
+        };
+
+        // ===== 音频 =====
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(type) {
+            if (!settings.soundEnabled || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } else {
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.type = 'sawtooth';
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            }
+        }
+
+        // ===== 设置存储 =====
+        function saveSettings() {
+            localStorage.setItem('quxue-math-settings', JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('quxue-math-settings');
+            if (saved) {
+                try { settings = { ...settings, ...JSON.parse(saved) }; } catch (e) {}
+            }
+            updateSettingsUI();
+        }
+
+        function updateSettingsUI() {
+            ['add', 'sub', 'mixed'].forEach(type => {
+                const btn = document.getElementById(`btn-${type}`);
+                if (btn) btn.classList.toggle('active', settings.questionType === type);
+            });
+            [10, 20].forEach(r => {
+                const btn = document.getElementById(`btn-range-${r}`);
+                if (btn) btn.classList.toggle('active', settings.range === r);
+            });
+            [10, 20, 50].forEach(c => {
+                const btn = document.getElementById(`btn-count-${c}`);
+                if (btn) btn.classList.toggle('active', settings.questionCount === c);
+            });
+            document.getElementById('soundToggle').checked = settings.soundEnabled;
+        }
+
+        // ===== 设置函数 =====
+        function toggleSettings() {
+            const content = document.getElementById('settingsContent');
+            const chevron = document.getElementById('settingsChevron');
+            content.classList.toggle('hidden');
+            chevron.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        function setQuestionType(type) { settings.questionType = type; saveSettings(); updateSettingsUI(); }
+        function setRange(range) { settings.range = range; saveSettings(); updateSettingsUI(); }
+        function setCount(count) { settings.questionCount = count; saveSettings(); updateSettingsUI(); }
+        function toggleSound() {
+            settings.soundEnabled = document.getElementById('soundToggle').checked;
+            saveSettings();
+            if (settings.soundEnabled) initAudio();
+        }
+
+        // ===== 题目 =====
+        function generateQuestion() {
+            const max = settings.range;
+            let op = settings.questionType;
+            if (op === 'mixed') op = Math.random() > 0.5 ? 'add' : 'sub';
+
+            let n1, n2;
+            if (op === 'add') {
+                // 加法：确保结果不超过 max
+                // n1 范围: 1 到 max-1
+                n1 = Math.floor(Math.random() * (max - 1)) + 1;
+                // n2 范围: 1 到 max-n1
+                n2 = Math.floor(Math.random() * (max - n1)) + 1;
+            } else {
+                // 减法：确保结果为正数
+                n1 = Math.floor(Math.random() * max) + 1;
+                n2 = Math.floor(Math.random() * n1) + 1;
+            }
+
+            return { n1, n2, op, answer: op === 'add' ? n1 + n2 : n1 - n2 };
+        }
+
+        // ===== 计时器 =====
+        function startTimer() {
+            practice.startTime = Date.now();
+            practice.timerInterval = setInterval(() => {
+                const s = Math.floor((Date.now() - practice.startTime) / 1000);
+                document.getElementById('timer').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        function stopTimer() { clearInterval(practice.timerInterval); }
+
+        // ===== 答题 =====
+        function startPractice() {
+            initAudio();
+            practice = {
+                active: true,
+                currentQ: generateQuestion(),
+                index: 1,
+                correct: 0,
+                answered: 0,
+                startTime: Date.now(),
+                timerInterval: null
+            };
+
+            startTimer();
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('resetBtn').classList.remove('hidden');
+            document.getElementById('inputSection').classList.remove('hidden');
+            showQuestion();
+            updateStats();
+        }
+
+        function showQuestion() {
+            const q = practice.currentQ;
+            const opSymbol = q.op === 'add' ? '+' : '-';
+            document.getElementById('questionDisplay').innerHTML = `
+                <div class="question-text flex items-center justify-center gap-3">
+                    <span class="text-slate-800">${q.n1}</span>
+                    <span class="text-slate-400">${opSymbol}</span>
+                    <span class="text-slate-800">${q.n2}</span>
+                    <span class="text-slate-400">=</span>
+                    <input type="text" id="answerInput"
+                           class="answer-input text-center bg-white"
+                           placeholder="?" disabled>
+                </div>
+            `;
+
+            const card = document.getElementById('questionCard');
+            card.className = 'question-card rounded-3xl p-6 mb-4 text-center animate-fade-in';
+
+            const input = document.getElementById('answerInput');
+            input.value = '';
+            input.disabled = false;
+            input.focus();
+        }
+
+        function inputNum(num) {
+            if (!practice.active) return;
+            const input = document.getElementById('answerInput');
+            if (input.value.length < 3) input.value += num;
+            input.focus();
+        }
+
+        function clearAnswer() {
+            if (!practice.active) return;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').focus();
+        }
+
+        function submitAnswer() {
+            if (!practice.active) return;
+
+            const input = document.getElementById('answerInput');
+            const ans = parseInt(input.value);
+            if (isNaN(ans)) { input.focus(); return; }
+
+            practice.answered++;
+            const isCorrect = ans === practice.currentQ.answer;
+            const card = document.getElementById('questionCard');
+
+            if (isCorrect) {
+                practice.correct++;
+                playSound('correct');
+                card.classList.add('correct');
+                card.classList.remove('wrong');
+            } else {
+                playSound('wrong');
+                card.classList.add('wrong');
+                card.classList.remove('correct');
+            }
+
+            updateStats();
+
+            setTimeout(() => {
+                if (practice.index >= settings.questionCount) {
+                    finishPractice();
+                } else {
+                    practice.currentQ = generateQuestion();
+                    practice.index++;
+                    updateStats();
+                    showQuestion();
+                }
+            }, isCorrect ? 600 : 800);
+        }
+
+        function updateStats() {
+            document.getElementById('progressText').textContent = `${practice.index} / ${settings.questionCount}`;
+            document.getElementById('progressBar').style.width = `${(practice.index / settings.questionCount) * 100}%`;
+            document.getElementById('correctCount').textContent = practice.correct;
+            const acc = practice.answered > 0 ? Math.round((practice.correct / practice.answered) * 100) : 0;
+            document.getElementById('accuracy').textContent = `${acc}%`;
+        }
+
+        function finishPractice() {
+            practice.active = false;
+            stopTimer();
+            document.getElementById('answerInput').disabled = true;
+
+            const acc = Math.round((practice.correct / settings.questionCount) * 100);
+            const elapsed = Math.floor((Date.now() - practice.startTime) / 1000);
+            const timeStr = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`;
+
+            let stars, title, text;
+            if (acc === 100) { stars = '⭐⭐⭐'; title = '太棒了！'; text = '全部正确，勇夺三星！'; }
+            else if (acc >= 80) { stars = '⭐⭐'; title = '很优秀！'; text = '再接再厉！'; }
+            else if (acc >= 60) { stars = '⭐'; title = '还不错！'; text = '继续加油！'; }
+            else { stars = '💪'; title = '继续努力！'; text = '多练几次会更好！'; }
+
+            document.getElementById('starRating').innerHTML = stars.split('').map(s => `<span class="star">${s}</span>`).join('');
+            document.getElementById('achievementTitle').textContent = title;
+            document.getElementById('achievementText').textContent = text;
+            document.getElementById('finalCorrect').textContent = practice.correct;
+            document.getElementById('finalAccuracy').textContent = `${acc}%`;
+            document.getElementById('finalTime').textContent = timeStr;
+
+            document.getElementById('achievementModal').classList.remove('hidden');
+            document.getElementById('achievementModal').classList.add('flex');
+        }
+
+        function resetPractice() {
+            document.getElementById('achievementModal').classList.add('hidden');
+            document.getElementById('achievementModal').classList.remove('flex');
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('resetBtn').classList.add('hidden');
+            document.getElementById('inputSection').classList.add('hidden');
+
+            document.getElementById('questionDisplay').innerHTML = `
+                <div class="text-slate-400 mb-4">👇 点击下方「开始练习」按钮开始</div>
+            `;
+            document.getElementById('questionCard').className = 'question-card rounded-3xl p-8 mb-6 text-center';
+
+            stopTimer();
+            practice = { active: false, correct: 0, answered: 0, index: 0 };
+
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressText').textContent = `0 / ${settings.questionCount}`;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('accuracy').textContent = '0%';
+            document.getElementById('timer').textContent = '0:00';
+        }
+
+        function closeAchievement() {
+            document.getElementById('achievementModal').classList.add('hidden');
+            document.getElementById('achievementModal').classList.remove('flex');
+            startPractice();
+        }
+
+        // ===== 弹窗 =====
+        function toggleHelp() {
+            const m = document.getElementById('helpModal');
+            m.classList.toggle('hidden');
+            m.classList.toggle('flex');
+        }
+
+        // ===== 初始化 =====
+        window.onload = () => {
+            loadSettings();
+            document.getElementById('settingsContent').classList.add('hidden');
+            document.getElementById('settingsChevron').style.transform = 'rotate(0deg)';
+        };
+
+        document.getElementById('helpModal').addEventListener('click', e => { if (e.target === e.currentTarget) toggleHelp(); });
+        document.getElementById('achievementModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAchievement(); });
+
+        // 键盘回车提交
+        document.getElementById('answerInput')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') submitAnswer();
+        });
+    </script>
+</body>
+</html>
