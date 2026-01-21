@@ -141,13 +141,12 @@
 
         /* 输入框 */
         .answer-input {
-            width: 100px;
-            height: 80px;
-            font-size: 2.5rem;
+            width: 4rem;
+            font-size: 2rem;
             font-weight: 700;
             text-align: center;
             border: 4px solid #CBD5E1;
-            border-radius: 16px;
+            border-radius: 1rem;
             outline: none;
             transition: all 0.2s ease;
             background: #FFFFFF;
@@ -162,15 +161,13 @@
         .numpad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
         }
 
         .numpad-btn {
-            height: 62px;
             font-size: 1.5rem;
             font-weight: 600;
             border: none;
-            border-radius: 16px;
+            border-radius: 0.5rem;
             background: #FFFFFF;
             color: #334155;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -301,8 +298,8 @@
         /* 响应式 */
         @media (max-width: 360px) {
             .question-text { font-size: 2.2rem; }
-            .answer-input { width: 80px; height: 70px; font-size: 2rem; }
-            .numpad-btn { height: 54px; font-size: 1.3rem; }
+            .answer-input { width: 4rem; font-size: 2rem; }
+            .numpad-btn { font-size: 1.3rem; }
         }
 
         /* 打印样式 */
@@ -411,15 +408,15 @@
             </div>
 
             <!-- 题目 -->
-            <div id="questionCard" class="question-card rounded-3xl p-8 mb-6 text-center">
-                <div id="questionDisplay" class="animate-fade-in">
+            <div id="questionCard" class="question-card rounded-3xl p-4 mb-6 text-center">
+                <div id="questionDisplay" class="animate-fade-in flex">
                     <div class="text-slate-400 mb-4">👇 点击下方开始按钮开始练习</div>
                 </div>
             </div>
 
             <!-- 数字键盘 -->
             <div id="inputSection" class="hidden mt-4">
-                <div class="numpad max-w-sm mx-auto">
+                <div class="numpad max-w-sm mx-auto gap-4">
                     <button onclick="inputNum(1)" class="numpad-btn">1</button>
                     <button onclick="inputNum(2)" class="numpad-btn">2</button>
                     <button onclick="inputNum(3)" class="numpad-btn">3</button>
@@ -666,19 +663,20 @@
             const q = practice.currentQ;
             const opSymbol = q.op === 'add' ? '+' : '-';
             document.getElementById('questionDisplay').innerHTML = `
-                <div class="question-text flex items-center justify-center gap-3">
-                    <span class="text-slate-800">${q.n1}</span>
-                    <span class="text-slate-400">${opSymbol}</span>
-                    <span class="text-slate-800">${q.n2}</span>
-                    <span class="text-slate-400">=</span>
+                <div class="text-3xl font-black text-slate-800 flex items-center justify-between gap-4">
+                    <span>${q.n1}</span>
+                    <span class="text-slate-300 text-3xl">${opSymbol}</span>
+                    <span>${q.n2}</span>
+                    <span class="text-slate-300 text-3xl">=</span>
                     <input type="text" id="answerInput"
-                           class="answer-input text-center bg-white"
-                           placeholder="?" disabled>
+                                    class="answer-input text-center bg-white"
+                                    inputmode="none"
+                                    placeholder="?" disabled>
                 </div>
             `;
 
             const card = document.getElementById('questionCard');
-            card.className = 'question-card rounded-3xl p-6 mb-4 text-center animate-fade-in';
+            card.className = 'question-card rounded-3xl p-4 mb-4 text-center animate-fade-in';
 
             const input = document.getElementById('answerInput');
             input.value = '';
