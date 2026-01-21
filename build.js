@@ -121,6 +121,11 @@ function cleanDir(dir) {
 function build() {
   console.log('开始构建...\n');
 
+  if (!fs.existsSync(BUILD_DIR)) {
+    fs.mkdirSync(BUILD_DIR, { recursive: true });
+    console.log(`创建build目录: ${BUILD_DIR}`);
+  }
+
   // 清空并重新构建 build 目录
   cleanDir(BUILD_DIR);
 
