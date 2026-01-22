@@ -77,7 +77,7 @@ function buildIndex(pages) {
   // 生成 JSON 数据
   const pageDataJson = JSON.stringify(pages.map(p => ({
     url: p.url,
-    title: p.title.replace(/^[🎒📚✏️🎯]+?\s*/, ''), // 移除emoji前缀
+    title: p.title.replace(/^[🎒📚✏️🎯]+?\s*/, '').trim(), // 移除emoji前缀
     desc: '点击开始练习'
   })));
 

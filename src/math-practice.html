@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -52,7 +53,9 @@
         }
     </script>
     <style>
-        * { -webkit-tap-highlight-color: transparent; }
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
 
         body {
             min-height: 100vh;
@@ -75,28 +78,93 @@
             border-radius: 50px;
         }
 
-        .cloud::before, .cloud::after {
+        .cloud::before,
+        .cloud::after {
             content: '';
             position: absolute;
             background: inherit;
             border-radius: 50%;
         }
 
-        .cloud-1 { width: 120px; height: 45px; top: 8%; left: -5%; opacity: 0.5; animation: float 8s ease-in-out infinite; }
-        .cloud-1::before { width: 60px; height: 60px; top: -30px; left: 20px; }
-        .cloud-1::after { width: 40px; height: 40px; top: -20px; left: 60px; }
+        .cloud-1 {
+            width: 120px;
+            height: 45px;
+            top: 8%;
+            left: -5%;
+            opacity: 0.5;
+            animation: float 8s ease-in-out infinite;
+        }
 
-        .cloud-2 { width: 90px; height: 35px; top: 25%; right: -5%; opacity: 0.4; animation: float 10s ease-in-out infinite 1s; }
-        .cloud-2::before { width: 45px; height: 45px; top: -22px; left: 12px; }
-        .cloud-2::after { width: 32px; height: 32px; top: -15px; left: 45px; }
+        .cloud-1::before {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: 20px;
+        }
 
-        .cloud-3 { width: 70px; height: 28px; top: 55%; left: 10%; opacity: 0.5; animation: float 12s ease-in-out infinite 2s; }
-        .cloud-3::before { width: 35px; height: 35px; top: -18px; left: 10px; }
-        .cloud-3::after { width: 25px; height: 25px; top: -12px; left: 35px; }
+        .cloud-1::after {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            left: 60px;
+        }
+
+        .cloud-2 {
+            width: 90px;
+            height: 35px;
+            top: 25%;
+            right: -5%;
+            opacity: 0.4;
+            animation: float 10s ease-in-out infinite 1s;
+        }
+
+        .cloud-2::before {
+            width: 45px;
+            height: 45px;
+            top: -22px;
+            left: 12px;
+        }
+
+        .cloud-2::after {
+            width: 32px;
+            height: 32px;
+            top: -15px;
+            left: 45px;
+        }
+
+        .cloud-3 {
+            width: 70px;
+            height: 28px;
+            top: 55%;
+            left: 10%;
+            opacity: 0.5;
+            animation: float 12s ease-in-out infinite 2s;
+        }
+
+        .cloud-3::before {
+            width: 35px;
+            height: 35px;
+            top: -18px;
+            left: 10px;
+        }
+
+        .cloud-3::after {
+            width: 25px;
+            height: 25px;
+            top: -12px;
+            left: 35px;
+        }
 
         @keyframes float {
-            0%, 100% { transform: translateX(0) translateY(0); }
-            50% { transform: translateX(20px) translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateX(0) translateY(0);
+            }
+
+            50% {
+                transform: translateX(20px) translateY(-10px);
+            }
         }
 
         /* 卡片样式 */
@@ -150,6 +218,14 @@
             outline: none;
             transition: all 0.2s ease;
             background: #FFFFFF;
+        }
+
+        .answer-input.correct {
+            border-color: #22C55E;
+        }
+
+        .answer-input.wrang {
+            border-color: #EF4444;
         }
 
         .answer-input:focus {
@@ -233,8 +309,13 @@
         }
 
         @keyframes progressShimmer {
-            0% { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
         }
 
         /* 开始按钮 */
@@ -285,30 +366,64 @@
             transform: scale(0);
         }
 
-        .star:nth-child(1) { animation-delay: 0.1s; }
-        .star:nth-child(2) { animation-delay: 0.3s; }
-        .star:nth-child(3) { animation-delay: 0.5s; }
+        .star:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .star:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .star:nth-child(3) {
+            animation-delay: 0.5s;
+        }
 
         @keyframes starPop {
-            0% { opacity: 0; transform: scale(0) rotate(-180deg); }
-            60% { opacity: 1; transform: scale(1.2) rotate(10deg); }
-            100% { opacity: 1; transform: scale(1) rotate(0); }
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(-180deg);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(1.2) rotate(10deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0);
+            }
         }
 
         /* 响应式 */
         @media (max-width: 360px) {
-            .question-text { font-size: 2.2rem; }
-            .answer-input { width: 4rem; font-size: 2rem; }
-            .numpad-btn { font-size: 1.3rem; }
+            .question-text {
+                font-size: 2.2rem;
+            }
+
+            .answer-input {
+                width: 4rem;
+                font-size: 2rem;
+            }
+
+            .numpad-btn {
+                font-size: 1.3rem;
+            }
         }
 
         /* 打印样式 */
         @media print {
-            .no-print { display: none !important; }
-            .question-card { border: 2px solid #000; }
+            .no-print {
+                display: none !important;
+            }
+
+            .question-card {
+                border: 2px solid #000;
+            }
         }
     </style>
 </head>
+
 <body class="font-child text-slate-700 relative z-10">
     <!-- 装饰背景 -->
     <div class="decoration-bg">
@@ -324,21 +439,32 @@
                 <span class="text-4xl">🎒</span>
                 <h1 class="text-xl font-bold text-slate-800">趣学加减法</h1>
             </div>
-            <button onclick="toggleHelp()"
+            <div class="flex items-center justify-between gap-4 mr-6">
+                <button onclick="startPractice()"
+                class="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-lg hover:scale-105 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="size-6 stroke-[#16A34A]">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                </svg>
+                </button>
+                <button onclick="toggleSettings()"
                     class="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-lg hover:scale-105 transition-transform">
-                ❓
-            </button>
+                    ⚙️
+                </button>
+            </div>
         </header>
 
         <!-- 设置区 (可折叠) -->
-        <div class="card p-5 mb-5 no-print">
-            <div class="flex items-center justify-between mb-4 cursor-pointer" onclick="toggleSettings()">
+        <div id="settingsCard" class="card p-5 mb-5 no-print hidden">
+            <div class="flex items-center justify-between mb-4 cursor-pointer">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">⚙️</span>
                     <span class="font-bold text-slate-700">设置</span>
                 </div>
-                <svg id="settingsChevron" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                <svg id="settingsChevron" class="w-5 h-5 text-slate-400 transition-transform rotate(180deg)" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </div>
 
@@ -347,12 +473,11 @@
                 <div>
                     <p class="text-sm text-slate-500 mb-2">题型</p>
                     <div class="flex gap-2">
-                        <button onclick="setQuestionType('add')" id="btn-add"
-                                class="option-btn flex-1 active">➕ 加法</button>
-                        <button onclick="setQuestionType('sub')" id="btn-sub"
-                                class="option-btn flex-1">➖ 减法</button>
-                        <button onclick="setQuestionType('mixed')" id="btn-mixed"
-                                class="option-btn flex-1">🔀 混合</button>
+                        <button onclick="setQuestionType('add')" id="btn-add" class="option-btn flex-1 active">➕
+                            加法</button>
+                        <button onclick="setQuestionType('sub')" id="btn-sub" class="option-btn flex-1">➖ 减法</button>
+                        <button onclick="setQuestionType('mixed')" id="btn-mixed" class="option-btn flex-1">🔀
+                            混合</button>
                     </div>
                 </div>
 
@@ -360,10 +485,9 @@
                 <div>
                     <p class="text-sm text-slate-500 mb-2">范围</p>
                     <div class="flex gap-2">
-                        <button onclick="setRange(10)" id="btn-range-10"
-                                class="option-btn flex-1 active">📗 10以内</button>
-                        <button onclick="setRange(20)" id="btn-range-20"
-                                class="option-btn flex-1">📙 20以内</button>
+                        <button onclick="setRange(10)" id="btn-range-10" class="option-btn flex-1 active">📗
+                            10以内</button>
+                        <button onclick="setRange(20)" id="btn-range-20" class="option-btn flex-1">📙 20以内</button>
                     </div>
                 </div>
 
@@ -371,12 +495,9 @@
                 <div>
                     <p class="text-sm text-slate-500 mb-2">题量</p>
                     <div class="flex gap-2">
-                        <button onclick="setCount(10)" id="btn-count-10"
-                                class="option-btn flex-1 active">10题</button>
-                        <button onclick="setCount(20)" id="btn-count-20"
-                                class="option-btn flex-1">20题</button>
-                        <button onclick="setCount(50)" id="btn-count-50"
-                                class="option-btn flex-1">50题</button>
+                        <button onclick="setCount(10)" id="btn-count-10" class="option-btn flex-1 active">10题</button>
+                        <button onclick="setCount(20)" id="btn-count-20" class="option-btn flex-1">20题</button>
+                        <button onclick="setCount(50)" id="btn-count-50" class="option-btn flex-1">50题</button>
                     </div>
                 </div>
 
@@ -388,7 +509,9 @@
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="soundToggle" class="sr-only peer" onchange="toggleSound()">
-                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                        <div
+                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5">
+                        </div>
                     </label>
                 </div>
             </div>
@@ -397,7 +520,7 @@
         <!-- 答题区 -->
         <div class="card p-8 mb-5">
             <!-- 进度 -->
-            <div class="mb-6 no-print">
+            <div id="progress" class="mb-6 no-print hidden">
                 <div class="flex justify-between text-sm mb-2">
                     <span class="text-slate-500">进度</span>
                     <span id="progressText" class="font-semibold text-slate-700">0 / 10</span>
@@ -410,7 +533,16 @@
             <!-- 题目 -->
             <div id="questionCard" class="question-card rounded-3xl p-4 mb-6 text-center">
                 <div id="questionDisplay" class="animate-fade-in flex">
-                    <div class="text-slate-400 mb-4">👇 点击下方开始按钮开始练习</div>
+                    <div id="helpContent" class="text-black-400 mb-4 flex-col items-center justify-center w-full">
+                        <h3 class="text-xl font-bold text-center mb-4">📖 使用说明</h3>
+                        <div class="space-y-3 text-black-600 text-sm flex-col text-left pl-4">
+                            <p>1. 先设置题型和难度</p>
+                            <p>2. 点击开始按钮进入答题</p>
+                            <p>3. 用数字键盘输入答案</p>
+                            <p>4. 点击 ✓ 提交，自动判分</p>
+                            <p>5. 完成所有题目查看成绩</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -426,7 +558,7 @@
                     <button onclick="inputNum(7)" class="numpad-btn">7</button>
                     <button onclick="inputNum(8)" class="numpad-btn">8</button>
                     <button onclick="inputNum(9)" class="numpad-btn">9</button>
-                    <button onclick="clearAnswer()" class="numpad-btn clear">⌫</button>
+                    <button onclick="deleteNum()" class="numpad-btn clear">⌫</button>
                     <button onclick="inputNum(0)" class="numpad-btn">0</button>
                     <button onclick="submitAnswer()" class="numpad-btn submit">✓</button>
                 </div>
@@ -434,7 +566,7 @@
         </div>
 
         <!-- 统计区 -->
-        <div class="grid grid-cols-3 gap-4 mb-5 no-print">
+        <div id="statusCard" class="grid grid-cols-3 gap-4 mb-5 no-print hidden">
             <div class="stat-box">
                 <div class="text-2xl font-bold text-green-500" id="correctCount">0</div>
                 <div class="text-xs text-slate-500 mt-1">正确</div>
@@ -447,36 +579,6 @@
                 <div class="text-2xl font-bold text-purple-500" id="timer">0:00</div>
                 <div class="text-xs text-slate-500 mt-1">用时</div>
             </div>
-        </div>
-
-        <!-- 按钮区 -->
-        <div class="flex gap-4 no-print">
-            <button onclick="startPractice()" id="startBtn"
-                    class="start-btn flex-1 py-4 rounded-2xl text-white text-lg font-bold transition-all">
-                🚀 开始练习
-            </button>
-            <button onclick="resetPractice()" id="resetBtn"
-                    class="hidden flex-1 py-4 bg-slate-200 text-slate-700 rounded-2xl text-lg font-bold hover:bg-slate-300 transition-all">
-                🔄 重新开始
-            </button>
-        </div>
-    </div>
-
-    <!-- 帮助弹窗 -->
-    <div id="helpModal" class="fixed inset-0 modal-overlay z-50 hidden items-center justify-center p-4">
-        <div class="modal-content p-6 max-w-sm w-full animate-pop-in">
-            <h3 class="text-xl font-bold text-center mb-4">📖 使用说明</h3>
-            <div class="space-y-3 text-slate-600 text-sm">
-                <p>1. 先设置题型和难度</p>
-                <p>2. 点击「开始练习」进入答题</p>
-                <p>3. 用数字键盘输入答案</p>
-                <p>4. 点击 ✓ 提交，自动判分</p>
-                <p>5. 完成所有题目查看成绩</p>
-            </div>
-            <button onclick="toggleHelp()"
-                    class="mt-6 w-full py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-colors">
-                知道了
-            </button>
         </div>
     </div>
 
@@ -503,7 +605,7 @@
             </div>
 
             <button onclick="closeAchievement()"
-                    class="w-full py-4 bg-green-500 text-white rounded-2xl text-lg font-bold hover:bg-green-600 transition-colors">
+                class="w-full py-4 bg-green-500 text-white rounded-2xl text-lg font-bold hover:bg-green-600 transition-colors">
                 🎮 再来一组
             </button>
         </div>
@@ -567,7 +669,7 @@
         function loadSettings() {
             const saved = localStorage.getItem('quxue-math-settings');
             if (saved) {
-                try { settings = { ...settings, ...JSON.parse(saved) }; } catch (e) {}
+                try { settings = { ...settings, ...JSON.parse(saved) }; } catch (e) { }
             }
             updateSettingsUI();
         }
@@ -590,10 +692,8 @@
 
         // ===== 设置函数 =====
         function toggleSettings() {
-            const content = document.getElementById('settingsContent');
-            const chevron = document.getElementById('settingsChevron');
-            content.classList.toggle('hidden');
-            chevron.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+            const settingsCard = document.getElementById('settingsCard');
+            settingsCard.classList.toggle('hidden');
         }
 
         function setQuestionType(type) { settings.questionType = type; saveSettings(); updateSettingsUI(); }
@@ -632,11 +732,16 @@
             practice.startTime = Date.now();
             practice.timerInterval = setInterval(() => {
                 const s = Math.floor((Date.now() - practice.startTime) / 1000);
-                document.getElementById('timer').textContent = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+                document.getElementById('timer').textContent = `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
             }, 1000);
         }
 
-        function stopTimer() { clearInterval(practice.timerInterval); }
+        function stopTimer() { 
+            if (practice.timerInterval) {
+                clearInterval(practice.timerInterval);
+                practice.timerInterval = null;
+            }
+        }
 
         // ===== 答题 =====
         function startPractice() {
@@ -651,10 +756,11 @@
                 timerInterval: null
             };
 
+            stopTimer();
             startTimer();
-            document.getElementById('startBtn').classList.add('hidden');
-            document.getElementById('resetBtn').classList.remove('hidden');
             document.getElementById('inputSection').classList.remove('hidden');
+            document.getElementById('progress').classList.remove('hidden');
+            document.getElementById('statusCard').classList.remove('hidden');
             showQuestion();
             updateStats();
         }
@@ -663,11 +769,11 @@
             const q = practice.currentQ;
             const opSymbol = q.op === 'add' ? '+' : '-';
             document.getElementById('questionDisplay').innerHTML = `
-                <div class="text-3xl font-black text-slate-800 flex items-center justify-between gap-4">
+                <div class="text-3xl font-black text-slate-800 flex items-center justify-between w-full">
                     <span>${q.n1}</span>
-                    <span class="text-slate-300 text-3xl">${opSymbol}</span>
+                    <span class="text-3xl">${opSymbol}</span>
                     <span>${q.n2}</span>
-                    <span class="text-slate-300 text-3xl">=</span>
+                    <span class="text-3xl">=</span>
                     <input type="text" id="answerInput"
                                     class="answer-input text-center bg-white"
                                     inputmode="none"
@@ -681,20 +787,18 @@
             const input = document.getElementById('answerInput');
             input.value = '';
             input.disabled = false;
-            input.focus();
         }
 
         function inputNum(num) {
             if (!practice.active) return;
             const input = document.getElementById('answerInput');
-            if (input.value.length < 3) input.value += num;
-            input.focus();
+            if (input && input.value.length < 3) input.value += num;
         }
 
-        function clearAnswer() {
+        function deleteNum() {
             if (!practice.active) return;
-            document.getElementById('answerInput').value = '';
-            document.getElementById('answerInput').focus();
+            const input = document.getElementById('answerInput');
+            if (input) input.value = input.value.slice(0, -1);
         }
 
         function submitAnswer() {
@@ -702,7 +806,7 @@
 
             const input = document.getElementById('answerInput');
             const ans = parseInt(input.value);
-            if (isNaN(ans)) { input.focus(); return; }
+            if (isNaN(ans)) { return; }
 
             practice.answered++;
             const isCorrect = ans === practice.currentQ.answer;
@@ -713,10 +817,14 @@
                 playSound('correct');
                 card.classList.add('correct');
                 card.classList.remove('wrong');
+                input.classList.add('correct');
+                input.classList.add('wrong');
             } else {
                 playSound('wrong');
                 card.classList.add('wrong');
                 card.classList.remove('correct');
+                input.classList.add('wrong');
+                input.classList.add('correct');
             }
 
             updateStats();
@@ -748,7 +856,7 @@
 
             const acc = Math.round((practice.correct / settings.questionCount) * 100);
             const elapsed = Math.floor((Date.now() - practice.startTime) / 1000);
-            const timeStr = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`;
+            const timeStr = `${Math.floor(elapsed / 60)}:${(elapsed % 60).toString().padStart(2, '0')}`;
 
             let stars, title, text;
             if (acc === 100) { stars = '⭐⭐⭐'; title = '太棒了！'; text = '全部正确，勇夺三星！'; }
@@ -767,49 +875,17 @@
             document.getElementById('achievementModal').classList.add('flex');
         }
 
-        function resetPractice() {
-            document.getElementById('achievementModal').classList.add('hidden');
-            document.getElementById('achievementModal').classList.remove('flex');
-            document.getElementById('startBtn').classList.remove('hidden');
-            document.getElementById('resetBtn').classList.add('hidden');
-            document.getElementById('inputSection').classList.add('hidden');
-
-            document.getElementById('questionDisplay').innerHTML = `
-                <div class="text-slate-400 mb-4">👇 点击下方「开始练习」按钮开始</div>
-            `;
-            document.getElementById('questionCard').className = 'question-card rounded-3xl p-8 mb-6 text-center';
-
-            stopTimer();
-            practice = { active: false, correct: 0, answered: 0, index: 0 };
-
-            document.getElementById('progressBar').style.width = '0%';
-            document.getElementById('progressText').textContent = `0 / ${settings.questionCount}`;
-            document.getElementById('correctCount').textContent = '0';
-            document.getElementById('accuracy').textContent = '0%';
-            document.getElementById('timer').textContent = '0:00';
-        }
-
         function closeAchievement() {
             document.getElementById('achievementModal').classList.add('hidden');
             document.getElementById('achievementModal').classList.remove('flex');
             startPractice();
         }
 
-        // ===== 弹窗 =====
-        function toggleHelp() {
-            const m = document.getElementById('helpModal');
-            m.classList.toggle('hidden');
-            m.classList.toggle('flex');
-        }
-
         // ===== 初始化 =====
         window.onload = () => {
             loadSettings();
-            document.getElementById('settingsContent').classList.add('hidden');
-            document.getElementById('settingsChevron').style.transform = 'rotate(0deg)';
         };
 
-        document.getElementById('helpModal').addEventListener('click', e => { if (e.target === e.currentTarget) toggleHelp(); });
         document.getElementById('achievementModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAchievement(); });
 
         // 键盘回车提交
@@ -818,4 +894,5 @@
         });
     </script>
 </body>
+
 </html>
