@@ -733,41 +733,6 @@
         </div>
     </div>
 
-    <!-- 帮助弹窗 -->
-    <div id="helpModal" class="fixed inset-0 modal-overlay z-50 hidden items-center justify-center p-4">
-        <div class="modal-content p-6 max-w-sm w-full animate-pop-in">
-            <h3 class="text-xl font-bold text-center mb-4">📖 使用说明</h3>
-            <div class="space-y-4 text-slate-600 text-sm">
-                <div class="bg-blue-50 p-3 rounded-xl">
-                    <p class="font-bold text-blue-700 mb-1">🔟 凑十法（加法）</p>
-                    <p>例：8 + 6 = 14</p>
-                    <p>把6分成2和4，先算8+2=10，再算10+4=14</p>
-                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;8&ensp;&ensp;+&ensp;&ensp;6&ensp;&ensp;=&ensp;[&ensp;14&ensp;]
-                    </p>
-                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;|&ensp;&ensp;&ensp;&ensp;/&ensp;\</p>
-                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;|&ensp;&ensp;[&ensp;2&ensp;]&ensp;[&ensp;4&ensp;]</p>
-                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;|&ensp;+&ensp;/&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;|</p>
-                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;└───&ensp;&ensp;&ensp;&ensp;+&ensp;&ensp;|</p>
-                    <p>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;10&ensp;&ensp;&ensp;────┘</p>
-                </div>
-                <div class="bg-red-50 p-3 rounded-xl">
-                    <p class="font-bold text-red-700 mb-1">💥 破十法（减法）</p>
-                    <p>例：15 - 7 = 8</p>
-                    <p>把15分成10和5，先算10-7=3，再算3+5=8</p>
-                </div>
-                <div class="bg-green-50 p-3 rounded-xl">
-                    <p class="font-bold text-green-700 mb-1">📐 平十法（减法）</p>
-                    <p>例：15 - 7 = 8</p>
-                    <p>把7分成5和2，先算15-5=10，再算10-2=8</p>
-                </div>
-            </div>
-            <button onclick="toggleHelp()"
-                class="mt-6 w-full py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-colors">
-                知道了
-            </button>
-        </div>
-    </div>
-
     <!-- 成就弹窗 -->
     <div id="achievementModal" class="fixed inset-0 modal-overlay z-50 hidden items-center justify-center p-4">
         <div class="modal-content p-8 max-w-sm w-full text-center animate-pop-in">
@@ -920,10 +885,6 @@
                 const b = Math.floor(Math.random() * (9 - otherPart)) + otherPart + 1;  // otherPart + 1 到 9
                 const afterMinus = 10 - b;  // 10-b的结果
 
-                // if (afterMinus < 0) {
-                //     return generateQuestion();
-                // }
-
                 q = {
                     method: 'break-ten',
                     a, b,
@@ -1007,44 +968,44 @@
                 asciiHTML = `
                 <div class="ascii-container">
                         <div id="r1" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank" maxlength="2" value="${a}">
-                            <input type="text" class="ascii-blank-72" maxlength="2" value="+">
-                            <input type="text" class="ascii-blank" maxlength="2" value="${b}">
-                            <input type="text" class="ascii-blank" maxlength="2" value="=">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="${a}">
+                            <input type="text" class="ascii-blank-72" maxlength="2" disabled value="+">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="${b}">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="=">
                             <input type="text" id="ans0" class="blank-input" inputmode="none" onclick="setFocus('ans0')" maxlength="2" placeholder="?">
                         </div>
                         <div id="r2" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank-54" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="/">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="\\">
+                            <input type="text" class="ascii-blank text-pink-600" maxlength="2" disabled value="|">
+                            <input type="text" class="ascii-blank-54" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="/">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="\\">
                         </div>
                         <div id="r3" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
                             <input type="text" id="ans1" class="blank-input" inputmode="none" onclick="setFocus('ans1')" maxlength="2" placeholder="?">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
                             <input type="text" id="ans2" class="blank-input" inputmode="none" onclick="setFocus('ans2')" maxlength="2" placeholder="?">
                         </div>
                         <div id="r4" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank" maxlength="2" value="+">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="/">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="+">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="/">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
                         </div>
                         <div id="r5" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="└">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank" maxlength="2" value="+">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="└">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="+">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
                         </div>
                         <div id="r6" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank-72" maxlength="2" value="10">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="┘">
+                            <input type="text" class="ascii-blank-72" maxlength="2" disabled value="10">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="┘">
                         </div>
                 </div>    
                 `;
@@ -1063,44 +1024,44 @@
                 asciiHTML = `
                     <div class="ascii-container">
                         <div id="r1" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank" maxlength="2" value="${a}">
-                            <input type="text" class="ascii-blank-72" maxlength="2" value="-">
-                            <input type="text" class="ascii-blank" maxlength="2" value="${b}">
-                            <input type="text" class="ascii-blank" maxlength="2" value="=">
+                            <input type="text" class="ascii-blank" disabled maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" disabled maxlength="2" value="${a}">
+                            <input type="text" class="ascii-blank-72" disabled maxlength="2" value="-">
+                            <input type="text" class="ascii-blank" disabled maxlength="2" value="${b}">
+                            <input type="text" class="ascii-blank" disabled maxlength="2" value="=">
                             <input type="text" id="ans0" class="blank-input" inputmode="none" onclick="setFocus('ans0')" maxlength="2" placeholder="?">
                         </div>
                         <div id="r2" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank-54" style="width: 18px;" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="/">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="\\">
-                            <input type="text" class="ascii-blank-54" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank-54" style="width: 18px;" disabled maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="/">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="\\">
+                            <input type="text" class="ascii-blank-54" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="|">
                         </div>
                         <div id="r3" class="flex w-full items-start">
                             <input type="text" id="ans1" class="blank-input" inputmode="none" onclick="setFocus('ans1')" maxlength="2" placeholder="?">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank" maxlength="2" value="10">
-                            <input type="text" class="ascii-blank" maxlength="2" value="-">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">    
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="10">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="-">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">    
                         </div>
                         <div id="r4" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="└">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="┘">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="└">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="┘">
                         </div>
                         <div id="r5" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank-72" maxlength="2" value="+">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
+                            <input type="text" class="ascii-blank-72" maxlength="2" disabled value="+">
                             <input type="text" id="ans2" class="blank-input" inputmode="none" onclick="setFocus('ans2')" maxlength="2" placeholder="?">
                         </div>
                         <div id="r6" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="└">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="┘">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="└">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="┘">
                         </div>
                     </div>
                 
@@ -1118,46 +1079,46 @@
                 asciiHTML = `
                     <div class="ascii-container">
                         <div id="r1" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank" maxlength="2" value="${a}">
-                            <input type="text" class="ascii-blank-72" maxlength="2" value="-">
-                            <input type="text" class="ascii-blank" maxlength="2" value="${b}">
-                            <input type="text" class="ascii-blank" maxlength="2" value="=">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="${a}">
+                            <input type="text" class="ascii-blank-72" maxlength="2" disabled value="-">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="${b}">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="=">
                             <input type="text" id="ans0" class="blank-input" inputmode="none" onclick="setFocus('ans0')" maxlength="2" placeholder="?">
                         </div>
                         <div id="r2" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank-54" style="width: 18px;" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="/">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="\\">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank-54" style="width: 18px;" disabled maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="/">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="\\">
                         </div>
                         <div id="r3" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" disabled value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
                             <input type="text" id="ans1" class="blank-input" inputmode="none" onclick="setFocus('ans1')" maxlength="2" placeholder="?">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
                             <input type="text" id="ans2" class="blank-input" inputmode="none" onclick="setFocus('ans2')" maxlength="2" placeholder="?">   
                         </div>
                         <div id="r4" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank" maxlength="2" value="-">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="-">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
                         </div>
                         <div id="r5" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="└">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="┘">
-                            <input type="text" class="ascii-blank" maxlength="2" value="-">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="|">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="└">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="┘">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="-">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="|">
                         </div>
                         <div id="r6" class="flex w-full items-start">
-                            <input type="text" class="ascii-blank" maxlength="2" value=" ">
-                            <input type="text" class="ascii-blank" maxlength="2" value="10">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="─">
-                            <input type="text" class="ascii-blank  text-pink-600" maxlength="2" value="┘">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value=" ">
+                            <input type="text" class="ascii-blank" maxlength="2" disabled value="10">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="─">
+                            <input type="text" class="ascii-blank  text-pink-600" disabled maxlength="2" value="┘">
                         </div>
                     </div>
                 `;
